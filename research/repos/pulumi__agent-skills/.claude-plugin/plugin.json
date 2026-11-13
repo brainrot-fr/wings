@@ -1,0 +1,35 @@
+{
+  "name": "pulumi",
+  "displayName": "Pulumi",
+  "version": "2.0.8",
+  "description": "Build cloud infrastructure with Pulumi. Skills for writing infrastructure as code, troubleshooting deployments, managing secrets, and migrating from Terraform, CloudFormation, AWS CDK, or Azure ARM.",
+  "author": {
+    "name": "Pulumi",
+    "url": "https://github.com/pulumi"
+  },
+  "homepage": "https://www.pulumi.com/docs/",
+  "documentationUrl": "https://www.pulumi.com/docs/ai/concepts/agent-skills/",
+  "supportUrl": "https://www.pulumi.com/docs/ai/",
+  "termsOfServiceUrl": "https://www.pulumi.com/terms-and-conditions/",
+  "repository": "https://github.com/pulumi/agent-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "pulumi",
+    "infrastructure-as-code",
+    "iac",
+    "cloud",
+    "migration",
+    "terraform",
+    "cloudformation",
+    "cdk",
+    "bicep",
+    "secrets",
+    "troubleshooting",
+    "automation"
+  ],
+  "skills": [
+    "./pulumi/skills",
+    "./migration/skills",
+    "./delegation/skills"
+  ]
+}

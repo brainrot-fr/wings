@@ -1,0 +1,278 @@
+[
+  {
+    "id": "auth-small-delta",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 20, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": ["src/auth/session.ts"], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 8, "newFiles": 0, "deltaShapes": ["auth", "high-stakes-path"], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0.0, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "deep",
+    "notes": "HIGH_STAKES_FILES non-empty is a deep trigger (D7) regardless of size."
+  },
+  {
+    "id": "big-delta",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 340, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "low", "semverDeltas": [], "symbols": [], "deltaLines": 320, "newFiles": 0, "deltaShapes": [], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0.0, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "deep",
+    "notes": "DELTA_LINES > 100 (D12) on ordinary source — the size exclusion does not apply because the shapes are not docs/test-only/generated."
+  },
+  {
+    "id": "mutex-small-delta",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 30, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 12, "newFiles": 0, "deltaShapes": ["concurrency"], "deltaRiskyShapes": ["concurrency"], "sameSymbolOverlap": false, "threadOverlap": 0.0, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "standard",
+    "notes": "A risky content shape with no deep trigger — small but dangerous still gets the middle tier."
+  },
+  {
+    "id": "readme-fix",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 10, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 6, "newFiles": 0, "deltaShapes": ["docs-only"], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0.0, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "quick",
+    "notes": "Docs-only with band=none is excused from the size triggers and matches no other row."
+  },
+  {
+    "id": "generated-client-refresh",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 90, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 412, "newFiles": 0, "deltaShapes": ["generated"], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0.0, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "quick",
+    "notes": "The size-exclusion case the phase exists for: 412 lines that reach nothing must not buy a deep pass on line count. cumDeltaLines set below FULL_REFRESH_DELTA (the original golden JSONL's own CUM_DELTA_LINES=412 would independently fire D4 in a strict implementation — a fixture-authoring artifact the L2 suite's narrative grading never caught; depth-routing.md's own worked example for this exact shape states \"no counter fired\", which is what this case now encodes)."
+  },
+  {
+    "id": "propagation-claude-md",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 25, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": true, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 14, "newFiles": 0, "deltaShapes": ["docs-only", "propagation"], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0.0, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "deep",
+    "notes": "Docs-only is excused from size, never from the other rows — PROPAGATION (D8) still fires."
+  },
+  {
+    "id": "new-file",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 40, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 22, "newFiles": 1, "deltaShapes": [], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0.0, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "deep",
+    "notes": "NEW_FILES > 0 (D13) on ordinary source: nothing has ever been reviewed in this file."
+  },
+  {
+    "id": "plain-logic",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 60, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 40, "newFiles": 0, "deltaShapes": [], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0.0, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "standard",
+    "notes": "11-100 lines of ordinary source with no risk signal — the middle tier's default population."
+  },
+  {
+    "id": "payment-rounding",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 15, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": ["billing/payment_processor.go"], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 9, "newFiles": 0, "deltaShapes": ["payments", "high-stakes-path"], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0.0, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "deep",
+    "notes": "High-stakes path floor (D7)."
+  },
+  {
+    "id": "proto-field-rename",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 20, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 15, "newFiles": 0, "deltaShapes": ["api-contract"], "deltaRiskyShapes": ["api-contract"], "sameSymbolOverlap": false, "threadOverlap": 0.0, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "standard",
+    "notes": "Risky content shape, no deep trigger."
+  },
+  {
+    "id": "sql-alter-outside-migrations",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 35, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 30, "newFiles": 0, "deltaShapes": ["schema-migration"], "deltaRiskyShapes": ["schema-migration"], "sameSymbolOverlap": false, "threadOverlap": 0.0, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "standard",
+    "notes": "Schema statement arrived by content rather than by a high-stakes path — risky shape, middle tier."
+  },
+  {
+    "id": "refresh-runs",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 90, "incrRunsSinceFull": 3, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 5, "newFiles": 0, "deltaShapes": ["docs-only"], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0.0, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "deep",
+    "notes": "The refresh counter fired (D5, 3 of 3) — a deep trigger, and the size exclusion has no bearing on it."
+  },
+  {
+    "id": "refresh-cumulative",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 200, "incrRunsSinceFull": 2, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 8, "newFiles": 0, "deltaShapes": [], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0.0, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "deep",
+    "notes": "Cumulative churn since the last deep pass crossed FULL_REFRESH_DELTA=150 (D4)."
+  },
+  {
+    "id": "dep-minor-bump-used",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 70, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [{ "delta": "minor", "usageSites": 11 }], "symbols": [], "deltaLines": 60, "newFiles": 0, "deltaShapes": ["dependency-bump"], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0.0, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "standard",
+    "notes": "A minor semver delta with live usage sites earns the dependency finder (standard row), not a whole-PR deep pass."
+  },
+  {
+    "id": "router-endpoint",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 18, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 10, "newFiles": 0, "deltaShapes": ["api-contract"], "deltaRiskyShapes": ["api-contract"], "sameSymbolOverlap": false, "threadOverlap": 0.0, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "standard",
+    "notes": "Risky content shape."
+  },
+  {
+    "id": "test-only",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 30, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 25, "newFiles": 0, "deltaShapes": ["test-only"], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0.0, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "quick",
+    "notes": "Test-only with band=none is excused from the size band, so 25 lines does not pull it to standard."
+  },
+  {
+    "id": "no-deep-pass-on-record",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 4, "incrRunsSinceFull": 2, "priorDeepRecorded": false, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 4, "newFiles": 0, "deltaShapes": [], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0.0, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "deep",
+    "notes": "No prior deep pass recorded is itself a refresh trigger (D6) — the deep lenses have never run on this PR."
+  },
+  {
+    "id": "blast-radius-high-small-delta",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 25, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "high", "semverDeltas": [], "symbols": [], "deltaLines": 14, "newFiles": 0, "deltaShapes": ["api-contract"], "deltaRiskyShapes": ["api-contract"], "sameSymbolOverlap": false, "threadOverlap": 0.0, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "deep",
+    "notes": "The case the phase exists for in the other direction — 14 lines that reach 14 consumer files (band=high, D9)."
+  },
+  {
+    "id": "blast-radius-none-medium-delta",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 80, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 70, "newFiles": 0, "deltaShapes": [], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0.0, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "standard",
+    "notes": "Ordinary source, so the size exclusion does not apply and the 11-100 band holds it at standard — reaching nothing keeps it out of deep, it does not drop it to quick."
+  },
+  {
+    "id": "dep-major-bump-used",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 12, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "medium", "semverDeltas": [{ "delta": "major", "usageSites": 6 }], "symbols": [], "deltaLines": 6, "newFiles": 0, "deltaShapes": ["dependency-bump"], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0.0, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "deep",
+    "notes": "A major semver delta (D10) is a deep trigger: 6 lines of lockfile can move two majors of behaviour across 6 call sites."
+  },
+  {
+    "id": "dep-patch-bump-unused",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 8, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [{ "delta": "patch", "usageSites": 0 }], "symbols": [], "deltaLines": 4, "newFiles": 0, "deltaShapes": ["dependency-bump"], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0.0, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "quick",
+    "notes": "The semver row is qualified by usage: a bump this repo imports nowhere has an empty intersection, so it must not buy a finder pass."
+  },
+  {
+    "id": "thread-answering-push",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 28, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 18, "newFiles": 0, "deltaShapes": [], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0.9, "depthCapability": "checkout", "zeroDelta": false },
+    "expected": "quick",
+    "notes": "The quick override: a push answering the review, reaching nothing. It beats the 11-100 standard band because the override is stated as always."
+  },
+  {
+    "id": "size-scaled-small-first-run",
+    "inputs": { "firstRun": true, "priorDeepRecorded": false, "band": "none", "deltaShapes": ["code"], "deltaLines": 40, "newFiles": 1 },
+    "expected": "standard",
+    "notes": "Size scaling: a first run of a 40-line PR with no risk trigger waives D1/D6/D13 and lands in the 31-400 band."
+  },
+  {
+    "id": "size-scaled-tiny-first-run",
+    "inputs": { "firstRun": true, "priorDeepRecorded": false, "band": "none", "deltaShapes": ["code"], "deltaLines": 20, "newFiles": 0 },
+    "expected": "quick",
+    "notes": "Size scaling: a first run at or under TINY_PR_LINES (30) with no risk trigger routes quick."
+  },
+  {
+    "id": "size-scaled-high-stakes-still-deep",
+    "inputs": { "firstRun": true, "priorDeepRecorded": false, "band": "none", "deltaShapes": ["code"], "deltaLines": 20, "highStakesFiles": ["db/migrations/0001.sql"] },
+    "expected": "deep",
+    "notes": "D7 is a risk trigger: size scaling never waives it."
+  },
+  {
+    "id": "size-scaled-band-medium-still-deep",
+    "inputs": { "firstRun": true, "priorDeepRecorded": false, "band": "medium", "deltaShapes": ["code"], "deltaLines": 20 },
+    "expected": "deep",
+    "notes": "D9 is a risk trigger: size scaling never waives it."
+  },
+  {
+    "id": "size-scaled-full-flag-still-deep",
+    "inputs": { "firstRun": true, "priorDeepRecorded": false, "band": "none", "deltaShapes": ["code"], "deltaLines": 20, "full": true },
+    "expected": "deep",
+    "notes": "--full (D2) always routes deep."
+  },
+  {
+    "id": "size-scaled-large-first-run-deep",
+    "inputs": { "firstRun": true, "priorDeepRecorded": false, "band": "none", "deltaShapes": ["code"], "deltaLines": 500, "newFiles": 3 },
+    "expected": "deep",
+    "notes": "Over SMALL_PR_LINES (400): size scaling does not apply, so D1 and D12 stand."
+  },
+  {
+    "id": "size-scaling-not-on-rerun",
+    "inputs": { "priorDeepRecorded": false, "deltaLines": 20, "band": "none", "deltaShapes": ["code"] },
+    "expected": "deep",
+    "notes": "A re-run measures one push, not the PR, so D6 is not waived."
+  },
+  {
+    "id": "size-scaled-medium-first-run",
+    "inputs": { "firstRun": true, "priorDeepRecorded": false, "band": "none", "deltaShapes": ["code"], "deltaLines": 250, "newFiles": 2 },
+    "expected": "standard",
+    "notes": "Size scaling: a 250-line first run with no risk trigger waives D12 too and routes standard."
+  },
+  {
+    "id": "size-scaled-medium-sensitive-deep",
+    "inputs": { "firstRun": true, "priorDeepRecorded": false, "band": "none", "deltaShapes": ["code"], "deltaLines": 250, "highStakesFiles": ["src/auth/session.ts"] },
+    "expected": "deep",
+    "notes": "A sensitive path (D7) keeps a medium first run deep."
+  },
+  {
+    "id": "size-scaled-docs-only-standard",
+    "inputs": { "firstRun": true, "priorDeepRecorded": false, "band": "none", "deltaShapes": ["docs-only"], "deltaLines": 350, "newFiles": 2 },
+    "expected": "standard",
+    "notes": "A size-excluded shape (docs-only, test-only, generated) keeps the scaled standard band: scaling replaced deep, so it must not fall to quick and lose the standards finder."
+  },
+  {
+    "id": "delta-big-pr-new-file",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 180, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 180, "newFiles": 1, "deltaShapes": [], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0, "prLines": 563 },
+    "expected": "standard",
+    "expectedDeltaScaled": true,
+    "notes": "A 180-line push that adds a file to a 563-line PR is reviewed as a delta: D12 and D13 are waived on a re-review of a big PR, and the cumulative 180 is under the scaled D4 threshold of 282."
+  },
+  {
+    "id": "delta-big-pr-large-push",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 350, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 350, "newFiles": 0, "deltaShapes": [], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0, "prLines": 1200 },
+    "expected": "standard",
+    "expectedDeltaScaled": true,
+    "notes": "A 350-line push to a 1200-line PR stays a delta: D12 alone, at or under the big-push ceiling, with cumulative churn under the scaled D4 threshold of 500."
+  },
+  {
+    "id": "delta-over-big-push",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 450, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 450, "newFiles": 0, "deltaShapes": [], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0, "prLines": 1200 },
+    "expected": "deep",
+    "expectedDeltaScaled": false,
+    "notes": "A push over the 400-line ceiling is a big change to the PR, so D12 stays and the whole PR is re-read."
+  },
+  {
+    "id": "delta-big-pr-refresh-scaled",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 300, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 60, "newFiles": 0, "deltaShapes": [], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0, "prLines": 563 },
+    "expected": "deep",
+    "expectedDeltaScaled": false,
+    "notes": "Cumulative churn of 300 on a 563-line PR passes the scaled D4 threshold of 282, so the refresh fires even though each push is small."
+  },
+  {
+    "id": "delta-small-pr-new-file",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 40, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 22, "newFiles": 1, "deltaShapes": [], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0, "prLines": 200 },
+    "expected": "deep",
+    "expectedDeltaScaled": false,
+    "notes": "On a PR at or under 400 lines a new file still routes deep: a whole-PR re-read is cheap there and nothing else measures the new file."
+  },
+  {
+    "id": "delta-unknown-pr-size",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 100, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 180, "newFiles": 0, "deltaShapes": [], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0 },
+    "expected": "deep",
+    "expectedDeltaScaled": false,
+    "notes": "An unknown PR size is never delta-scaled, so a 180-line push keeps D12."
+  },
+  {
+    "id": "delta-big-pr-high-stakes",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 80, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": ["src/auth/session.ts"], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 80, "newFiles": 0, "deltaShapes": [], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0, "prLines": 900 },
+    "expected": "deep",
+    "expectedDeltaScaled": false,
+    "notes": "A risk trigger (D7) is never waived: a high-stakes path in a small push to a big PR still routes deep."
+  },
+  {
+    "id": "delta-big-pr-no-prior-deep",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 180, "incrRunsSinceFull": 1, "priorDeepRecorded": false, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 180, "newFiles": 0, "deltaShapes": [], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0, "prLines": 900 },
+    "expected": "deep",
+    "expectedDeltaScaled": false,
+    "notes": "Without a recorded prior deep pass (D6) there is no baseline to take a delta against, so the whole PR is reviewed."
+  },
+  {
+    "id": "delta-big-pr-third-incremental",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 200, "incrRunsSinceFull": 3, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 150, "newFiles": 0, "deltaShapes": [], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0, "prLines": 900 },
+    "expected": "deep",
+    "expectedDeltaScaled": false,
+    "notes": "D5 is a risk trigger: the third incremental run since the last deep pass re-reads the PR even when each push is a plain delta."
+  },
+  {
+    "id": "delta-big-pr-tiny-new-file",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 8, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 8, "newFiles": 1, "deltaShapes": [], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0, "prLines": 900 },
+    "expected": "standard",
+    "expectedDeltaScaled": true,
+    "notes": "A push under 11 lines that adds a file to a big PR keeps standard: waiving D13 must not drop the new file to quick, which skips consumer-impact and standards."
+  },
+  {
+    "id": "delta-big-pr-refresh-cap",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 501, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 60, "newFiles": 0, "deltaShapes": [], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0, "prLines": 2000 },
+    "expected": "deep",
+    "expectedDeltaScaled": false,
+    "notes": "The scaled D4 threshold is capped at 500, so 501 cumulative lines refresh even on a 2000-line PR."
+  },
+  {
+    "id": "delta-big-pr-empty-new-file",
+    "inputs": { "firstRun": false, "full": false, "effortHigh": false, "cumDeltaLines": 0, "incrRunsSinceFull": 1, "priorDeepRecorded": true, "highStakesFiles": [], "propagation": false, "band": "none", "semverDeltas": [], "symbols": [], "deltaLines": 0, "newFiles": 1, "deltaShapes": [], "deltaRiskyShapes": [], "sameSymbolOverlap": false, "threadOverlap": 0, "prLines": 900 },
+    "expected": "standard",
+    "expectedDeltaScaled": true,
+    "notes": "A push that adds only an empty or binary file counts 0 delta lines; it still keeps standard, never quick."
+  }
+]

@@ -1,0 +1,906 @@
+#!/usr/bin/env node
+// @ts-check
+// route-depth.mjs — Phase C depth routing (pr-reviewer deterministic pipeline,
+// R4). A PURE function: `routeDepth(i)` takes the five inputs
+// (agents/pr-reviewer/rules/depth-routing.md § Five inputs, as scalars/arrays
+// rather than their upstream sources) and returns a tier with the reasons
+// that produced it. No I/O, no clock, no env — `prepare-review.mjs` gathers
+// the inputs; this file only decides.
+//
+// depth-routing.md is the single source of TRUTH for the routing rules —
+// read it for the WHY. This file is the single source of EXECUTION. Keep the
+// D-IDs and the two refresh thresholds below equal to what that rule file
+// states: change both in the same commit.
+//
+// Order of decisions, matching the rule file's own "first match wins, top to
+// bottom, with two rules that run BEFORE the table":
+//   1. The quick override (THREAD_OVERLAP >= 0.8 AND band == none) — fires
+//      before anything else, "whatever the table would say".
+//   2. The size exclusion (shapes exclusively docs-only/test-only/generated
+//      AND band == none) — waives ONLY D12/D13 and the standard row's size
+//      band; every other row still applies.
+//   3. D1-D13: ANY fires -> deep.
+//   4. The standard row's five OR-conditions.
+//   5. Otherwise -> quick.
+//   6. The capability cap: DEPTH_CAPABILITY == diff-only caps deep -> standard.
+
+import { readFileSync } from "node:fs";
+
+/** @typedef {{delta: "major"|"minor"|"patch"|string, usageSites: number}} SemverDelta */
+/** @typedef {{traffic_band?: string, change?: string}} ChangedSymbol */
+/**
+ * `zeroDelta` is accepted for forward compatibility with prepare-review.mjs's
+ * context shape, but is NOT a routing input — a zero authored delta is Step
+ * 0.8's short-circuit, decided BEFORE Phase C is ever reached
+ * (depth-routing.md § Zero-delta: "downgrades cost; it never predicts a
+ * clean pass" is a statement about what still runs, not a fourth tier this
+ * function owns).
+ * @typedef {{
+ *   firstRun?: boolean, full?: boolean, effortHigh?: boolean, forceDeep?: boolean,
+ *   cumDeltaLines?: number, incrRunsSinceFull?: number, priorDeepRecorded?: boolean,
+ *   highStakesFiles?: string[], propagation?: boolean, band?: string,
+ *   semverDeltas?: SemverDelta[], symbols?: ChangedSymbol[],
+ *   deltaLines?: number, newFiles?: number, prLines?: number,
+ *   deltaShapes?: string[], deltaRiskyShapes?: string[],
+ *   sameSymbolOverlap?: boolean, threadOverlap?: number,
+ *   depthCapability?: string,
+ *   zeroDelta?: boolean,
+ * }} RouteDepthInput
+ * @typedef {{tier: "deep"|"standard"|"quick", triggers: string[],
+ *   override: "quick"|null, sizeExcluded: boolean, capApplied: boolean,
+ *   sizeScaled: boolean, deltaScaled: boolean, waived: string[], why: string[]}} RouteDepthResult
+ */
+
+export const FULL_REFRESH_DELTA = 150;
+export const FULL_REFRESH_RUNS = 3;
+/** D4's threshold scales with the PR (depth-routing.md § The deep-lens refresh): a fraction of the
+ *  PR's changed lines, never below FULL_REFRESH_DELTA and never above MAX_REFRESH_DELTA. */
+export const REFRESH_PR_FRACTION = 0.5;
+export const MAX_REFRESH_DELTA = 500;
+/** What a failed or untrusted cumulative-churn compare reports: over every threshold `refreshDeltaFor`
+ *  can return, so "assume over, run deep" holds however large the PR is. */
+export const CHURN_OVER_THRESHOLD = MAX_REFRESH_DELTA + 1;
+
+/** @param {number|undefined} prLines the PR's changed lines; unknown or non-positive gives the floor. */
+export function refreshDeltaFor(prLines) {
+  const n = Number(prLines);
+  if (!Number.isFinite(n) || n <= 0) return FULL_REFRESH_DELTA;
+  return Math.max(FULL_REFRESH_DELTA, Math.min(Math.ceil(REFRESH_PR_FRACTION * n), MAX_REFRESH_DELTA));
+}
+
+/** D1-D13, in order — the checklist depth-routing.md enumerates rather than
+ *  packing into one table cell (the shape lesson: a 13-clause cell gets
+ *  scanned until something matches and the tail clauses get missed). */
+export const TRIGGERS = [
+  "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13",
+];
+
+const SIZE_EXCLUDED_SHAPES = new Set(["docs-only", "test-only", "generated"]);
+
+/** Size scaling (depth-routing.md § Size scaling): on a first run, a PR at or under SMALL_PR_LINES
+ *  changed lines that fires no risk trigger is excused from the history and size triggers (D1, D6,
+ *  D12, D13), and routes `quick` at or under TINY_PR_LINES and `standard` above. */
+export const SMALL_PR_LINES = 400;
+export const TINY_PR_LINES = 30;
+/** Delta scaling (depth-routing.md § Delta scaling): on a re-review of a PR over BIG_PR_LINES changed
+ *  lines whose only deep triggers are the size triggers (D12, D13), a push at or under BIG_PUSH_LINES is
+ *  reviewed as a delta at `standard`; an unknown PR size is never scaled. */
+export const BIG_PR_LINES = SMALL_PR_LINES;
+export const BIG_PUSH_LINES = 400;
+/** The triggers that measure risk; a small PR firing any of them still routes deep. */
+const RISK_TRIGGERS = new Set(["D2", "D3", "D4", "D5", "D7", "D8", "D9", "D10", "D11"]);
+
+/**
+ * The size exclusion: shapes are a non-empty subset drawn EXCLUSIVELY from
+ * {docs-only, test-only, generated}, and band == none.
+ * @param {string[]} deltaShapes @param {string} band
+ */
+function isSizeExcluded(deltaShapes, band) {
+  if (band !== "none") return false;
+  if (!deltaShapes || deltaShapes.length === 0) return false;
+  return deltaShapes.every((s) => SIZE_EXCLUDED_SHAPES.has(s));
+}
+
+/** @param {RouteDepthInput} i @returns {RouteDepthResult} */
+export function routeDepth(i) {
+  const band = i.band ?? "none";
+  const threadOverlap = i.threadOverlap ?? 0;
+  const deltaShapes = i.deltaShapes ?? [];
+  const deltaRiskyShapes = i.deltaRiskyShapes ?? [];
+  const semverDeltas = i.semverDeltas ?? [];
+  const symbols = i.symbols ?? [];
+  const highStakesFiles = i.highStakesFiles ?? [];
+  const deltaLines = i.deltaLines ?? 0;
+  const newFiles = i.newFiles ?? 0;
+  const cumDeltaLines = i.cumDeltaLines ?? 0;
+  const incrRunsSinceFull = i.incrRunsSinceFull ?? 0;
+
+  /** @type {string[]} */
+  const why = [];
+
+  // 1. The quick override — before the table, "whatever the table would say".
+  if (threadOverlap >= 0.8 && band === "none") {
+    why.push(`quick override: THREAD_OVERLAP=${threadOverlap} >= 0.8 and band=none`);
+    return { tier: "quick", triggers: [], override: "quick", sizeExcluded: false, capApplied: false, sizeScaled: false, deltaScaled: false, waived: [], why };
+  }
+
+  // 2. The size exclusion — computed before the deep checklist so D12/D13
+  // and the standard row's size band can both consult it.
+  const sizeExcluded = isSizeExcluded(deltaShapes, band);
+  if (sizeExcluded) why.push(`size exclusion: shapes=[${deltaShapes.join(",")}] band=none — D12/D13 and the standard size band are waived`);
+
+  // 3. D1-D13 — ANY fires -> deep.
+  /** @type {string[]} */
+  const triggers = [];
+  if (i.firstRun) triggers.push("D1");
+  if (i.full) triggers.push("D2");
+  if (i.effortHigh || i.forceDeep) triggers.push("D3");
+  if (cumDeltaLines > refreshDeltaFor(i.prLines)) triggers.push("D4");
+  if (incrRunsSinceFull >= FULL_REFRESH_RUNS) triggers.push("D5");
+  if (i.priorDeepRecorded === false) triggers.push("D6");
+  if (highStakesFiles.length > 0) triggers.push("D7");
+  if (i.propagation) triggers.push("D8");
+  if (band === "medium" || band === "high") triggers.push("D9");
+  if (semverDeltas.some((d) => d.delta === "major")) triggers.push("D10");
+  if (symbols.some((s) => s.traffic_band === "high" && (s.change === "signature" || s.change === "removed"))) triggers.push("D11");
+  if (!sizeExcluded && deltaLines > 100) triggers.push("D12");
+  if (!sizeExcluded && newFiles > 0) triggers.push("D13");
+
+  // Size scaling: a small PR with no risk trigger is excused from D1/D6/D12/D13. First runs only — there
+  // DELTA_LINES is the whole PR; on a re-run it is one push, which says nothing about the PR's size.
+  const sizeScaled = !!i.firstRun && deltaLines <= SMALL_PR_LINES
+    && !triggers.some((t) => RISK_TRIGGERS.has(t));
+  /** @type {string[]} */
+  let waived = [];
+  if (sizeScaled) {
+    why.push(`size scaling: DELTA_LINES(${deltaLines}) <= ${SMALL_PR_LINES} and no risk trigger — waived ${triggers.join(", ")}`);
+    waived = [...triggers];
+    triggers.length = 0;
+  }
+
+  // Delta scaling: a re-review of a big PR whose only deep triggers are the size triggers reviews the
+  // delta. Every other trigger (risk, refresh counters, a missing prior deep pass) still routes deep,
+  // and `sizeScaled` stays false: it means "a whole-PR review at a lighter tier" and renders mode `full`.
+  const deltaScaled = !sizeScaled && !i.firstRun && i.priorDeepRecorded === true
+    && Number(i.prLines) > BIG_PR_LINES && deltaLines <= BIG_PUSH_LINES
+    && triggers.length > 0 && triggers.every((t) => t === "D12" || t === "D13");
+  if (deltaScaled) {
+    why.push(`delta scaling: PR(${i.prLines}) > ${BIG_PR_LINES}, DELTA_LINES(${deltaLines}) <= ${BIG_PUSH_LINES}, prior deep pass recorded, no risk trigger — waived ${triggers.join(", ")}`);
+    waived = [...triggers];
+    triggers.length = 0;
+  }
+
+  if (triggers.length > 0) {
+    why.push(`deep triggers: ${triggers.join(", ")}`);
+    let tier = /** @type {"deep"|"standard"} */ ("deep");
+    let capApplied = false;
+    if (i.depthCapability === "diff-only") {
+      tier = "standard";
+      capApplied = true;
+      why.push("capability cap: DEPTH_CAPABILITY=diff-only caps deep -> standard");
+    }
+    return { tier, triggers, override: null, sizeExcluded, capApplied, sizeScaled: false, deltaScaled: false, waived: [], why };
+  }
+
+  // 4. The standard row — five OR-conditions, any one fires.
+  const usedSemverDelta = semverDeltas.find((d) => d.usageSites >= 1);
+  // A size-scaled run reviews the whole PR, so its standard band starts above TINY_PR_LINES.
+  // A delta-scaled run waived a trigger that measures something no other row does (D13's new file), so its
+  // floor is 0: a tiny or empty push that adds a file keeps `standard`'s consumer-impact and standards finders.
+  const bandFloor = sizeScaled ? TINY_PR_LINES + 1 : deltaScaled ? 0 : 11;
+  const bandCeiling = sizeScaled ? SMALL_PR_LINES : deltaScaled ? BIG_PUSH_LINES : 100;
+  // On a scaled run the size band replaces deep, so a size-excluded shape keeps it (and its standards finder).
+  const inSizeBand = (sizeScaled || !sizeExcluded) && deltaLines >= bandFloor && deltaLines <= bandCeiling;
+  if (deltaRiskyShapes.length > 0) why.push(`standard: DELTA_RISKY_SHAPES=[${deltaRiskyShapes.join(",")}]`);
+  if (band === "low") why.push("standard: blast_radius.band=low");
+  if (usedSemverDelta) why.push(`standard: semver_delta=${usedSemverDelta.delta} with ${usedSemverDelta.usageSites} usage site(s)`);
+  if (i.sameSymbolOverlap) why.push("standard: overlaps[].kind=same-symbol");
+  if (inSizeBand) why.push(`standard: ${bandFloor} <= DELTA_LINES(${deltaLines}) <= ${bandCeiling}`);
+
+  if (deltaRiskyShapes.length > 0 || band === "low" || usedSemverDelta || i.sameSymbolOverlap || inSizeBand) {
+    return { tier: "standard", triggers: [], override: null, sizeExcluded, capApplied: false, sizeScaled, deltaScaled, waived, why };
+  }
+
+  // 5. Otherwise -> quick.
+  why.push("otherwise: no row above matched");
+  return { tier: "quick", triggers: [], override: null, sizeExcluded, capApplied: false, sizeScaled, deltaScaled, waived, why };
+}
+
+/* ------------------------------ resolveBudget ------------------------------ */
+// A/B round 1 delta. `routeDepth` still decides the tier (deep/standard/quick)
+// from the D1-D13 rules above, unchanged. `resolveBudget` is a SECOND pure
+// function, layered on top, that turns a continuous 0..1 THOROUGHNESS value
+// (defaulted from the routed tier, or an explicit override) into every
+// dispatch/scope lever this pipeline used to leave to model discretion.
+// depth-routing.md § Thoroughness budget is the single source of TRUTH for
+// the breakpoints below and the WHY each one sits where it does; this is the
+// EXECUTION, same split as routeDepth/depth-routing.md above. Change both in
+// the same commit.
+
+/** Tier -> default thoroughness when no explicit override is given. What each default turns on is
+ *  depth-routing.md § Thoroughness budget's per-tier table, the one place that lists it. */
+export const TIER_DEFAULT_THOROUGHNESS = { quick: 0.4, standard: 0.7, deep: 0.85 };
+
+/** The named depth presets (`--depth`, config `depth:`). Each is one of the breakpoint columns below,
+ *  represented by the thoroughness the matching tier default resolves to, so a preset and the tier
+ *  default of the same name give the same budget. `deep` and `max` also force the deep tier. */
+export const DEPTH_PRESETS = Object.freeze(["quick", "standard", "deep", "max"]);
+export const PRESET_THOROUGHNESS = Object.freeze({ quick: 0.4, standard: 0.7, deep: 0.85, max: 1 });
+
+/** The preset whose column contains `t`: below 0.5 quick, [0.5, 0.8) standard, [0.8, 0.95) deep, from 0.95 max. */
+/** @param {number} t */
+export function presetOfThoroughness(t) {
+  return t >= 0.95 ? "max" : t >= 0.8 ? "deep" : t >= 0.5 ? "standard" : "quick";
+}
+
+/**
+ * The depth a run reports: the preset asked for (or the one the routed default lands in), the
+ * preset it ran at, and the risk floor when it lifted the two apart.
+ * @param {{ requested?: string|null, source: string, budget: { requestedThoroughness: number, effectiveThoroughness: number, riskFloorApplied: boolean, riskFloorReason: string|null } }} i
+ */
+export function describeDepth({ requested = null, source, budget }) {
+  const asked = requested ?? presetOfThoroughness(budget.requestedThoroughness);
+  const effective = presetOfThoroughness(budget.effectiveThoroughness);
+  const floor = budget.riskFloorApplied ? budget.riskFloorReason : null;
+  const line = floor && asked !== effective
+    ? `depth ${asked} -> ${effective} (floor: ${floor})`
+    : `depth ${effective} (${source})`;
+  return { requested: asked, effective, source, floor, line };
+}
+
+/** `--effort high` / `effort: high` is an alias for the ceiling. */
+export const EFFORT_HIGH_THOROUGHNESS = 1;
+
+/** A diff carrying any of these shapes floors the EFFECTIVE thoroughness — an
+ *  explicit low override never under-reviews a high-stakes diff. This is a
+ *  safety net for an override, not a duplicate of D7/D9: those already force
+ *  `routedTier = "deep"` (so the default thoroughness is already 0.85) for the
+ *  same shapes; the floor only ever matters when something (a user, a config
+ *  default) asks for less than 0.5 anyway. */
+const HIGH_STAKES_SHAPES = new Set(["auth", "payments", "schema-migration", "secrets", "infra"]);
+export const RISK_FLOOR = 0.5;
+
+/** A/B round 2 item 2: the original spec named `blast_radius.band == "high"`
+ *  (impact.json's own field — `resolveBudget`'s caller reads it as `i.band`,
+ *  the same shape `routeDepth`'s D9 already consumes) as a risk-floor input,
+ *  and it was missing — at `t=0.3` on a band-high PR (61 exports),
+ *  consumer-impact never activated (`T_FINDERS_MID` is 0.5) and the run found
+ *  nothing. `band == "high"` now floors exactly like a high-stakes SHAPE:
+ *  the floor is a safety net for an override on a diff D9 already routes to
+ *  `deep` by default, so it only bites when something asks for less than 0.5
+ *  anyway. */
+
+/** Breakpoints. Each is a `t >=` threshold. The tier defaults above
+ *  (0.4 / 0.7 / 0.85) each land one band past a breakpoint, so every default
+ *  budget is the one depth-routing.md's breakpoint table states for that
+ *  column. The holistic-escalation cap is `round(10 * t)` by design — what
+ *  "escalation SCALES with thoroughness" means: 4 / 7 / 9 at the defaults. */
+const T_TOPOLOGY = 0.4;
+const T_FINDERS_MID = 0.5; // consumer-impact(delta) + dependency + standards(delta) join
+const T_FINDERS_HIGH = 0.8; // consumer-impact/standards widen delta -> all
+/** A/B round 8 (sync-tray#72, a run with every finder as its own sub-agent): two correctness votes raised 24 and 25
+ *  candidates and dedupe merged few of them across the two, so the votes added candidates for the
+ *  verifier instead of corroborating each other — at ~10 minutes of one worker each. Votes are
+ *  retired: every budget runs ONE correctness pass. The field stays in the budget (always 1) so a
+ *  consumer reading it keeps working, and a future run that shows votes adding confirmed recall
+ *  reintroduces the ladder here and in depth-routing.md together. */
+const CORRECTNESS_VOTES = 1;
+const T_VERIFY_TIER_2 = 0.5;
+const T_VERIFY_TIER_3 = 0.95;
+const T_OPTIMALITY = 0.7;
+const T_MEASURABILITY = 0.4;
+/** A/B round 2 item 3: Step 2.4's holistic broad pass had no explicit lever —
+ *  it ran unconditionally (gated only by holistic-review.md's five
+ *  TRIVIAL_SKIP conditions, never by thoroughness), so whether it ran on a
+ *  given budget was ambiguous. `T_TOPOLOGY`'s own breakpoint (0.4) is reused
+ *  here deliberately: below it the review dispatches nothing, so tying the two
+ *  together is not a second independent guess. Below 0.4 — reachable only through an explicit
+ *  override, since quick defaults to 0.4 — the lever is off; `routedTier === "deep"` still
+ *  forces it on regardless of any override, same shape as the risk floor. */
+const T_HOLISTIC_BROAD = 0.4;
+
+/** A/B iterations 1–3 (sync-tray#72, 22 files): the tool-call budget scaled with FILE COUNT only
+ *  (pr-reviewer.md § Stop conditions), so every thoroughness paid for its extra finders, votes and
+ *  lenses out of the same 60 calls. Arms at t=0.8 skipped whole files to stay inside it — one
+ *  declared a partial review after reading 13 of 22 files, and the file it only grepped held the
+ *  highest-severity corroborated defect, which that arm missed in all three rounds. The budget is
+ *  a ceiling, not a target, so raising it costs nothing on a run that does not need it. The bands
+ *  were doubled after a 127-file deep review declared a partial review at 32 files. */
+export const TOOL_CALL_BANDS = Object.freeze([
+  { maxFiles: 10, calls: 60 },
+  { maxFiles: 30, calls: 120 },
+  { maxFiles: Infinity, calls: 200 },
+]);
+const T_TOOLCALLS_1_5 = 0.8;
+const T_TOOLCALLS_2 = 0.95;
+
+/** Lenses (select-lenses.mjs) have no count cap, so each one past the first three, which the bands
+ *  already absorb, adds a fixed number of calls to walk its checklist and verify what it raises. */
+export const LENS_CALLS = 10;
+const LENSES_IN_BAND = 3;
+
+/** A/B rounds 7–8: the default review runs in ONE context, plus the intent finder as its own
+ *  sub-agent. Isolated, the intent finder flagged the highest-severity agreed defect on sync-tray#72
+ *  in 3 of 3 runs (5–6 minutes each); run in one context with the other finders, the default
+ *  setting had missed it in 4 of 4 rounds. A fully parallel topology (every finder its own
+ *  sub-agent, the removed `/pr-review --fanout`) found every known defect but projected to ~57
+ *  minutes against 9–13 for one context, so there is no parallel topology. */
+export const HYBRID_ISOLATED_FINDERS = Object.freeze(["intent"]);
+
+/** Run modes on which a `standard`/`quick` re-review skips the isolated intent worker. UNMEASURED:
+ *  the A/B evidence for `hybrid` is one deep, 22-file, full review (sync-tray#72); no A/B round
+ *  ever ran an incremental re-review, so this default is a cost call, not a measured one. On
+ *  dash0#20655 the reviewer idled ~125 s waiting for the worker — a worker that also re-ran the
+ *  whole prepare — on a delta far smaller than the review that justified it. An explicit
+ *  `--thoroughness` or `--effort high` still gets `hybrid`; only the defaulted budget changes. */
+export const SMALL_INCREMENTAL_MODES = Object.freeze(["incremental", "incremental-quick", "zero-delta"]);
+const SMALL_INCREMENTAL_TIERS = new Set(["standard", "quick"]);
+
+/** A defaulted `quick` budget is lean on every run mode (depth-routing.md § Thoroughness budget):
+ *  one context, no holistic broad pass, no impact image. A `quick` routing means size scaling or the
+ *  quick override found nothing that needs more, so the fixed overhead those levers carry buys nothing. */
+const LEAN_TIERS = new Set(["quick"]);
+
+/** `finder_passes` (review-config.md § Run-level knobs). `1` is the single finder pass every run has
+ *  always made. `2` adds a second pass: the same active finders, run again by two dispatched workers
+ *  that never see pass 1's output, unioned with pass 1 before verification
+ *  (dispatch-topology.md § Two finder passes). Bounded at 2, because each pass costs two sub-agents'
+ *  base. This is a union for recall, not the retired correctness vote: nothing is promoted for
+ *  being raised twice. */
+export const MAX_FINDER_PASSES = 2;
+/** The worker units pass 2 dispatches, as the run ledger records them (`worker <unit> end`). */
+export const SECOND_PASS_UNITS = Object.freeze(["intent-2", "other-finders-2"]);
+/** UNMEASURED: pass 2's new candidates are verified in the reviewer's own turn, so its tool-call
+ *  budget grows by half. Without it a two-pass run at `t < 0.8` (30 calls for ≤ 10 files) would
+ *  truncate verification. */
+export const FINDER_PASS_CALL_MULTIPLIER = 1.5;
+
+/** @param {string[]} shape @param {string} band */
+function highStakesReason(shape, band) {
+  const hit = (shape ?? []).find((s) => HIGH_STAKES_SHAPES.has(s));
+  if (hit) return hit;
+  return band === "high" ? "blast_radius:high" : null;
+}
+
+/**
+ * @typedef {{
+ *   thoroughness?: number, routedTier?: "deep"|"standard"|"quick",
+ *   shape?: string[], band?: string, depthCapability?: string,
+ *   dispatchAvailable?: boolean, effortHigh?: boolean, changedFiles?: number,
+ *   runMode?: string, finderPasses?: number, priorShaFromState?: boolean,
+ *   lensCount?: number, presetAsk?: "quick"|"standard",
+ * }} ResolveBudgetInput
+ * @typedef {{
+ *   effectiveThoroughness: number, requestedThoroughness: number,
+ *   riskFloorApplied: boolean, riskFloorReason: string|null, inputError: string|null,
+ *   finders: {correctness: boolean, intent: boolean, quality: boolean,
+ *     "consumer-impact": boolean, dependency: boolean, standards: boolean},
+ *   finderScope: {"consumer-impact": "none"|"delta"|"all", standards: "none"|"delta"|"all"},
+ *   correctnessVotes: 1, topology: "in-context"|"hybrid", isolatedFinders: string[],
+ *   topologyReason: "below-breakpoint"|"no-dispatch"|"small-incremental"|"lean"|"hybrid",
+ *   maxVerificationTier: 1|2|3, holisticEscalationCap: number,
+ *   optimalityLens: boolean, measurabilityLens: boolean, holisticBroadPass: boolean, impactImage: boolean, lean: boolean,
+ *   toolCallMultiplier: 1|1.5|2, toolCalls: number|null,
+ *   finderPasses: 1|2, finderPassesRequested: 1|2,
+ *   finderPassesReason: "single"|"requested"|"no-dispatch"|"zero-delta", secondPassUnits: string[],
+ *   capabilityNotes: string[],
+ * }} Budget
+ */
+
+/** @param {ResolveBudgetInput} i @returns {Budget} */
+export function resolveBudget(i = {}) {
+  const dispatchAvailable = i.dispatchAvailable ?? true;
+  const shape = i.shape ?? [];
+
+  // --- resolve the BASE thoroughness value, fail-closed on garbage input ---
+  let inputError = null;
+  let base;
+  if (i.effortHigh) {
+    base = EFFORT_HIGH_THOROUGHNESS;
+  } else if (i.thoroughness === undefined || i.thoroughness === null) {
+    base = i.routedTier ? (TIER_DEFAULT_THOROUGHNESS[i.routedTier] ?? null) : null;
+    if (base === null) {
+      // No explicit value AND no (recognised) routed tier to default from —
+      // fail CLOSED means the safe direction here is maximum scrutiny, not
+      // silently reviewing at zero.
+      inputError = `no thoroughness given and routedTier "${i.routedTier}" has no default`;
+      base = 1;
+    }
+  } else if (typeof i.thoroughness !== "number" || !Number.isFinite(i.thoroughness)) {
+    inputError = `thoroughness "${i.thoroughness}" is not a finite number`;
+    base = 1; // fail closed: maximum scrutiny, never a silent under-review
+  } else {
+    base = Math.min(1, Math.max(0, i.thoroughness));
+    if (i.thoroughness < 0 || i.thoroughness > 1) inputError = `thoroughness ${i.thoroughness} out of [0,1] — clamped to ${base}`;
+  }
+
+  // --- risk floor ---
+  const band = i.band ?? "none";
+  const floorReason = highStakesReason(shape, band);
+  const riskFloorApplied = floorReason !== null && base < RISK_FLOOR;
+  const t = riskFloorApplied ? RISK_FLOOR : base;
+
+  const findersMid = t >= T_FINDERS_MID;
+  const findersHigh = t >= T_FINDERS_HIGH;
+
+  // --- item 3: budget vs. capability. A `deep`-thoroughness budget whose
+  // materialized workspace cannot support a finder is not a smaller budget —
+  // it is the SAME budget with a finder that cannot run turned off, and the
+  // reason recorded rather than left ambiguous (A/B round 2 observed defect:
+  // "under diff-only it still activated consumer-impact, which
+  // finder-consumer-impact.md excludes"). Only consumer-impact excludes
+  // diff-only today (finder-consumer-impact.md § DEPTH_CAPABILITY = diff-only);
+  // dependency and standards carry no such exclusion in their own rule files.
+  const depthCapability = i.depthCapability;
+  /** @type {string[]} */
+  const capabilityNotes = [];
+  let consumerImpactActive = findersMid;
+  /** @type {"none"|"delta"|"all"} */
+  let consumerImpactScope = findersMid ? (findersHigh ? "all" : "delta") : "none";
+  if (depthCapability === "diff-only" && consumerImpactActive) {
+    consumerImpactActive = false;
+    consumerImpactScope = "none";
+    capabilityNotes.push(
+      "consumer-impact deactivated: DEPTH_CAPABILITY=diff-only (finder-consumer-impact.md excludes diff-only)",
+    );
+  }
+
+  /** @type {1|1.5|2} */
+  const toolCallMultiplier = t >= T_TOOLCALLS_2 ? 2 : t >= T_TOOLCALLS_1_5 ? 1.5 : 1;
+
+  // A small incremental re-review (a `standard`/`quick` tier on a non-full run mode) with a
+  // DEFAULTED thoroughness skips the worker — see SMALL_INCREMENTAL_MODES for why, and that it is
+  // unmeasured. An explicit override is a deliberate ask and keeps the breakpoint's answer.
+  const defaulted = !i.effortHigh && (i.thoroughness === undefined || i.thoroughness === null);
+  // A `quick` or `standard` preset is an ask for less work, so it keeps the carve-out too; a
+  // `deep`/`max` preset, an exact thoroughness, and `effortHigh` are asks for more and never do.
+  const lowPresetAsk = !i.effortHigh && (i.presetAsk === "quick" || i.presetAsk === "standard");
+  const smallIncremental = (defaulted || lowPresetAsk) && SMALL_INCREMENTAL_MODES.includes(String(i.runMode))
+    && SMALL_INCREMENTAL_TIERS.has(String(i.routedTier));
+  const lean = defaulted && LEAN_TIERS.has(String(i.routedTier));
+  /** @type {"below-breakpoint"|"no-dispatch"|"small-incremental"|"lean"|"hybrid"} */
+  const topologyReason = !dispatchAvailable ? "no-dispatch" : t < T_TOPOLOGY ? "below-breakpoint"
+    : smallIncremental ? "small-incremental" : lean ? "lean" : "hybrid";
+  /** @type {"in-context"|"hybrid"} */
+  const topology = topologyReason === "hybrid" ? "hybrid" : "in-context";
+  const isolatedFinders = topology === "hybrid" ? [...HYBRID_ISOLATED_FINDERS] : [];
+
+  // finder_passes: a second pass needs a dispatch (two isolated workers), so with none it collapses
+  // to one pass and says why. A zero-delta run drops pass 2 only when its prior SHA came from the
+  // PR-state record (`priorShaFromState`): only then does pr-reviewer.md Step 0.8 take the gates-only
+  // fast path. On the GitHub fallback rung it falls through to Step 1.2b, which promotes it to `full`,
+  // so pass 2 still runs. Pass 1's topology is left exactly as routed — pass 2 is additive. Any value
+  // other than 2 is a single pass.
+  /** @type {1|2} */
+  const finderPassesRequested = i.finderPasses === MAX_FINDER_PASSES ? MAX_FINDER_PASSES : 1;
+  const gatesOnlyZeroDelta = i.runMode === "zero-delta" && i.priorShaFromState === true;
+  /** @type {"single"|"requested"|"no-dispatch"|"zero-delta"} */
+  const finderPassesReason = finderPassesRequested === 1 ? "single"
+    : gatesOnlyZeroDelta ? "zero-delta" : !dispatchAvailable ? "no-dispatch" : "requested";
+  /** @type {1|2} */
+  const finderPasses = finderPassesReason === "requested" ? MAX_FINDER_PASSES : 1;
+  const passCallMultiplier = finderPasses === MAX_FINDER_PASSES ? FINDER_PASS_CALL_MULTIPLIER : 1;
+
+  return {
+    effectiveThoroughness: t,
+    requestedThoroughness: base,
+    riskFloorApplied,
+    riskFloorReason: riskFloorApplied ? floorReason : null,
+    inputError,
+    finders: {
+      correctness: true,
+      intent: true,
+      quality: true,
+      "consumer-impact": consumerImpactActive,
+      dependency: findersMid,
+      standards: findersMid,
+    },
+    finderScope: {
+      "consumer-impact": consumerImpactScope,
+      standards: findersMid ? (findersHigh ? "all" : "delta") : "none",
+    },
+    correctnessVotes: CORRECTNESS_VOTES,
+    topology,
+    topologyReason,
+    isolatedFinders,
+    maxVerificationTier: t >= T_VERIFY_TIER_3 ? 3 : t >= T_VERIFY_TIER_2 ? 2 : 1,
+    holisticEscalationCap: Math.round(10 * t),
+    optimalityLens: t >= T_OPTIMALITY,
+    measurabilityLens: t >= T_MEASURABILITY,
+    holisticBroadPass: (t >= T_HOLISTIC_BROAD && !lean) || i.routedTier === "deep",
+    impactImage: !lean,
+    lean,
+    toolCallMultiplier,
+    toolCalls: typeof i.changedFiles === "number" && Number.isFinite(i.changedFiles) && i.changedFiles >= 0
+      ? Math.round(toolCallBand(i.changedFiles) * toolCallMultiplier * passCallMultiplier)
+        + LENS_CALLS * Math.max(0, (i.lensCount ?? 0) - LENSES_IN_BAND) : null,
+    finderPasses,
+    finderPassesRequested,
+    finderPassesReason,
+    secondPassUnits: finderPasses === MAX_FINDER_PASSES ? [...SECOND_PASS_UNITS] : [],
+    capabilityNotes,
+  };
+}
+
+/** @param {number} changedFiles @returns {number} the base call budget for that many files */
+export function toolCallBand(changedFiles) {
+  const band = TOOL_CALL_BANDS.find((b) => changedFiles <= b.maxFiles);
+  return (band ?? TOOL_CALL_BANDS[TOOL_CALL_BANDS.length - 1]).calls;
+}
+
+/* --------------------------------- self-test --------------------------------- */
+
+function selfTest() {
+  const fails = [];
+  let total = 0;
+  let passed = 0;
+
+  const path = new URL("../../../scripts/eval/fixtures/route-depth/cases.json", import.meta.url);
+  /** @type {{id: string, inputs: RouteDepthInput, expected: string, expectedDeltaScaled?: boolean, notes?: string}[]} */
+  let cases;
+  try {
+    cases = JSON.parse(readFileSync(path, "utf8"));
+  } catch (e) {
+    console.log(`✗ route-depth self-test: could not read fixtures — ${/** @type {Error} */ (e).message}`);
+    process.exit(1);
+  }
+
+  for (const c of cases) {
+    total++;
+    const r = routeDepth(c.inputs);
+    if (c.expectedDeltaScaled !== undefined && r.deltaScaled !== c.expectedDeltaScaled) {
+      fails.push(`${c.id}: expected deltaScaled ${c.expectedDeltaScaled}, got ${r.deltaScaled} (${r.why.join(" | ")})`);
+    } else if (r.tier === c.expected) {
+      passed++;
+    } else {
+      fails.push(`${c.id}: expected ${c.expected}, got ${r.tier} (${r.why.join(" | ")})`);
+    }
+  }
+
+  // A few additional shape assertions beyond the golden 22, on the pure API
+  // itself — the constants and the D-id set depth-routing.md states.
+  const constOk = FULL_REFRESH_DELTA === 150 && FULL_REFRESH_RUNS === 3 && TRIGGERS.length === 13;
+  if (!constOk) fails.push("FULL_REFRESH_DELTA/FULL_REFRESH_RUNS/TRIGGERS drifted from depth-routing.md's stated values");
+  const scaleOk = REFRESH_PR_FRACTION === 0.5 && MAX_REFRESH_DELTA === 500 && BIG_PR_LINES === 400 && BIG_PUSH_LINES === 400
+    && CHURN_OVER_THRESHOLD > MAX_REFRESH_DELTA
+    && refreshDeltaFor(undefined) === 150 && refreshDeltaFor(200) === 150 && refreshDeltaFor(300) === 150
+    && refreshDeltaFor(563) === 282 && refreshDeltaFor(1000) === 500 && refreshDeltaFor(5000) === 500;
+  if (!scaleOk) fails.push("the scaled D4 threshold or the delta-scaling constants drifted from depth-routing.md's stated values");
+
+  const capped = routeDepth({ firstRun: true, deltaLines: 500, depthCapability: "diff-only" });
+  if (!(capped.tier === "standard" && capped.capApplied === true)) fails.push("capability cap did not downgrade a deep-triggering diff-only run to standard");
+
+  // ---- resolveBudget: each tier default resolves to the budget depth-routing.md states ----
+  total++;
+  const q = resolveBudget({ routedTier: "quick" });
+  if (q.effectiveThoroughness === 0.4 && q.correctnessVotes === 1 && q.topology === "in-context"
+    && q.topologyReason === "lean" && q.isolatedFinders.length === 0 && q.finders.intent === true
+    && q.maxVerificationTier === 1 && q.optimalityLens === false && q.measurabilityLens === true
+    && q.finders["consumer-impact"] === false && q.finders.dependency === false && q.finders.standards === false
+    && q.holisticEscalationCap === 4 && q.holisticBroadPass === false && q.impactImage === false
+    && q.lean === true && q.toolCallMultiplier === 1) passed++;
+  else fails.push(`resolveBudget(quick) drifted from the stated quick default budget: ${JSON.stringify(q)}`);
+
+  total++;
+  const st = resolveBudget({ routedTier: "standard" });
+  if (st.effectiveThoroughness === 0.7 && st.correctnessVotes === 1 && st.topology === "hybrid"
+    && JSON.stringify(st.isolatedFinders) === '["intent"]'
+    && st.maxVerificationTier === 2 && st.optimalityLens === true && st.measurabilityLens === true
+    && st.finders["consumer-impact"] === true && st.finderScope["consumer-impact"] === "delta"
+    && st.finders.standards === true && st.finderScope.standards === "delta"
+    && st.holisticEscalationCap === 7 && st.holisticBroadPass === true && st.impactImage === true
+    && st.toolCallMultiplier === 1) passed++;
+  else fails.push(`resolveBudget(standard) drifted from the stated standard default budget: ${JSON.stringify(st)}`);
+
+  total++;
+  const dp = resolveBudget({ routedTier: "deep" });
+  if (dp.effectiveThoroughness === 0.85 && dp.correctnessVotes === 1 && dp.topology === "hybrid"
+    && dp.maxVerificationTier === 2 && dp.optimalityLens === true && dp.measurabilityLens === true
+    && dp.finderScope["consumer-impact"] === "all" && dp.finderScope.standards === "all"
+    && dp.holisticEscalationCap === 9 && dp.holisticBroadPass === true && dp.toolCallMultiplier === 1.5) passed++;
+  else fails.push(`resolveBudget(deep) drifted from the stated deep default budget: ${JSON.stringify(dp)}`);
+
+  // ---- resolveBudget: the small-incremental carve-out keeps defaulted re-reviews in one context ----
+  // quick (0.4) and standard (0.7) defaults sit at or above the hybrid breakpoint, so without the
+  // carve-out every re-review would pay one isolated-worker dispatch.
+  total++;
+  {
+    const qInc = resolveBudget({ routedTier: "quick", runMode: "incremental-quick" });
+    const sInc = resolveBudget({ routedTier: "standard", runMode: "incremental" });
+    if (qInc.topology === "in-context" && qInc.topologyReason === "small-incremental" && qInc.lean === true
+      && sInc.lean === false && sInc.topology === "in-context" && sInc.topologyReason === "small-incremental") passed++;
+    else fails.push(`a defaulted re-review dispatched the isolated worker: ${JSON.stringify({ q: [qInc.topology, qInc.topologyReason], s: [sInc.topology, sInc.topologyReason] })}`);
+  }
+
+  // ---- resolveBudget: an explicit thoroughness on a quick routing is a deliberate ask, so not lean ----
+  total++;
+  {
+    const qAsk = resolveBudget({ routedTier: "quick", thoroughness: 0.7 });
+    if (qAsk.topology === "hybrid" && qAsk.holisticBroadPass === true && qAsk.impactImage === true && qAsk.lean === false) passed++;
+    else fails.push(`an explicit thoroughness on a quick routing was treated as lean: ${JSON.stringify([qAsk.topology, qAsk.holisticBroadPass, qAsk.impactImage])}`);
+  }
+
+  // ---- resolveBudget: holisticBroadPass "always on when routed deep" holds even
+  // under a low explicit override (a deep-routed PR with an under-thoroughness override
+  // must not lose the broad pass) ----
+  total++;
+  const deepLowOverride = resolveBudget({ thoroughness: 0.1, routedTier: "deep" });
+  if (deepLowOverride.holisticBroadPass === true) passed++;
+  else fails.push(`holisticBroadPass was not forced on for routedTier=deep under a low override: ${JSON.stringify(deepLowOverride)}`);
+
+  // ---- resolveBudget: risk floor — band high (item 2) ----
+  total++;
+  const bandFloored = resolveBudget({ thoroughness: 0.3, band: "high" });
+  if (bandFloored.riskFloorApplied === true && bandFloored.effectiveThoroughness === RISK_FLOOR
+    && bandFloored.riskFloorReason === "blast_radius:high"
+    && bandFloored.finders["consumer-impact"] === true) passed++;
+  else fails.push(`risk floor did not fire on blast_radius.band=high: ${JSON.stringify(bandFloored)}`);
+
+  total++;
+  const bandNotFloored = resolveBudget({ thoroughness: 0.8, band: "high" });
+  if (bandNotFloored.riskFloorApplied === false) passed++;
+  else fails.push(`risk floor fired on band=high when the override was already above the floor: ${JSON.stringify(bandNotFloored)}`);
+
+  total++;
+  const bandMedium = resolveBudget({ thoroughness: 0.1, band: "medium" });
+  if (bandMedium.riskFloorApplied === false) passed++;
+  else fails.push(`risk floor fired on band=medium, which is not in the floor's band set: ${JSON.stringify(bandMedium)}`);
+
+  // ---- resolveBudget: budget vs. capability (item 3) ----
+  total++;
+  const capBudget = resolveBudget({ routedTier: "deep", depthCapability: "diff-only" });
+  if (capBudget.finders["consumer-impact"] === false && capBudget.finderScope["consumer-impact"] === "none"
+    && capBudget.capabilityNotes.length === 1 && /diff-only/.test(capBudget.capabilityNotes[0])
+    // dependency/standards carry no diff-only exclusion in their own rule files — unaffected.
+    && capBudget.finders.dependency === true && capBudget.finders.standards === true) passed++;
+  else fails.push(`depthCapability=diff-only did not deactivate consumer-impact with a recorded reason: ${JSON.stringify(capBudget)}`);
+
+  total++;
+  const notCapped = resolveBudget({ routedTier: "deep", depthCapability: "checkout" });
+  if (notCapped.finders["consumer-impact"] === true && notCapped.capabilityNotes.length === 0) passed++;
+  else fails.push(`depthCapability=checkout wrongly deactivated a finder: ${JSON.stringify(notCapped)}`);
+
+  total++;
+  const cappedBelowMid = resolveBudget({ thoroughness: 0.3, depthCapability: "diff-only" });
+  if (cappedBelowMid.finders["consumer-impact"] === false && cappedBelowMid.capabilityNotes.length === 0) passed++;
+  else fails.push(`depthCapability=diff-only should be a no-op (and log nothing) when consumer-impact was already off: ${JSON.stringify(cappedBelowMid)}`);
+
+  total++;
+  const eh = resolveBudget({ effortHigh: true, routedTier: "deep" });
+  if (eh.effectiveThoroughness === 1 && eh.correctnessVotes === 1 && eh.maxVerificationTier === 3
+    && eh.holisticEscalationCap === 10) passed++;
+  else fails.push(`resolveBudget(--effort high) did not reach the ceiling on every lever: ${JSON.stringify(eh)}`);
+
+  // ---- resolveBudget: risk floor ----
+  total++;
+  const floored = resolveBudget({ thoroughness: 0.1, shape: ["auth"] });
+  if (floored.riskFloorApplied === true && floored.effectiveThoroughness === RISK_FLOOR
+    && floored.riskFloorReason === "auth") passed++;
+  else fails.push(`risk floor did not lift a low override on a high-stakes shape: ${JSON.stringify(floored)}`);
+
+  total++;
+  const notFloored = resolveBudget({ thoroughness: 0.8, shape: ["auth"] });
+  if (notFloored.riskFloorApplied === false && notFloored.effectiveThoroughness === 0.8) passed++;
+  else fails.push(`risk floor fired when the override was already above the floor: ${JSON.stringify(notFloored)}`);
+
+  total++;
+  const noShapeFloor = resolveBudget({ thoroughness: 0.1, shape: ["test-only"] });
+  if (noShapeFloor.riskFloorApplied === false && noShapeFloor.effectiveThoroughness === 0.1) passed++;
+  else fails.push(`risk floor fired on a shape that is not in the high-stakes set: ${JSON.stringify(noShapeFloor)}`);
+
+  // ---- resolveBudget: fails closed on garbage/out-of-range input ----
+  total++;
+  const nanIn = resolveBudget({ thoroughness: NaN, routedTier: "quick" });
+  if (nanIn.effectiveThoroughness === 1 && typeof nanIn.inputError === "string") passed++;
+  else fails.push(`NaN thoroughness did not fail closed to maximum scrutiny: ${JSON.stringify(nanIn)}`);
+
+  total++;
+  const tooHigh = resolveBudget({ thoroughness: 5, routedTier: "quick" });
+  if (tooHigh.effectiveThoroughness === 1 && typeof tooHigh.inputError === "string") passed++;
+  else fails.push(`out-of-range (>1) thoroughness was not clamped: ${JSON.stringify(tooHigh)}`);
+
+  total++;
+  const tooLow = resolveBudget({ thoroughness: -3, routedTier: "quick" });
+  if (tooLow.effectiveThoroughness === 0 && typeof tooLow.inputError === "string") passed++;
+  else fails.push(`out-of-range (<0) thoroughness was not clamped: ${JSON.stringify(tooLow)}`);
+
+  total++;
+  const noInput = resolveBudget({});
+  if (noInput.effectiveThoroughness === 1 && typeof noInput.inputError === "string") passed++;
+  else fails.push(`no thoroughness and no routedTier did not fail closed to maximum scrutiny: ${JSON.stringify(noInput)}`);
+
+  // ---- resolveBudget: tool-call budget scales with thoroughness (A/B iterations 1–3) ----
+  total++;
+  {
+    const q22 = resolveBudget({ routedTier: "quick", changedFiles: 22 });
+    const s22 = resolveBudget({ routedTier: "standard", changedFiles: 22 });
+    const d22 = resolveBudget({ routedTier: "deep", changedFiles: 22 });
+    const c22 = resolveBudget({ effortHigh: true, routedTier: "deep", changedFiles: 22 });
+    const m22 = resolveBudget({ thoroughness: 0.8, changedFiles: 22 });
+    const d5 = resolveBudget({ routedTier: "deep", changedFiles: 5 });
+    const d40 = resolveBudget({ routedTier: "deep", changedFiles: 40 });
+    const unknown = resolveBudget({ routedTier: "deep" });
+    if (q22.toolCalls === 120 && s22.toolCalls === 120 && m22.toolCalls === 180 && d22.toolCalls === 180 && c22.toolCalls === 240
+      && d5.toolCalls === 90 && d40.toolCalls === 300 && unknown.toolCalls === null
+      && q22.toolCallMultiplier === 1 && s22.toolCallMultiplier === 1 && m22.toolCallMultiplier === 1.5
+      && d22.toolCallMultiplier === 1.5 && c22.toolCallMultiplier === 2) passed++;
+    else fails.push(`tool-call budget drifted: ${JSON.stringify({ q: q22.toolCalls, s: s22.toolCalls, m: m22.toolCalls, d: d22.toolCalls, c: c22.toolCalls, d5: d5.toolCalls, d40: d40.toolCalls, u: unknown.toolCalls })}`);
+  }
+
+  // ---- resolveBudget: topology (A/B rounds 7–8) — hybrid from 0.4, in-context below or with no dispatch ----
+  total++;
+  {
+    const low = resolveBudget({ thoroughness: 0.3 });
+    const hyb = resolveBudget({ thoroughness: 0.8 });
+    const noDispatch = resolveBudget({ thoroughness: 0.8, dispatchAvailable: false });
+    const top = resolveBudget({ thoroughness: 1 });
+    if (low.topology === "in-context" && low.isolatedFinders.length === 0
+      && hyb.topology === "hybrid" && JSON.stringify(hyb.isolatedFinders) === '["intent"]'
+      && top.topology === "hybrid" && noDispatch.topology === "in-context" && noDispatch.isolatedFinders.length === 0
+      && [low, hyb, top].every((b) => b.correctnessVotes === 1)) passed++;
+    else fails.push(`topology/isolatedFinders/votes drifted: ${JSON.stringify({ low: low.topology, hyb: [hyb.topology, hyb.isolatedFinders], top: top.topology, noDispatch: noDispatch.topology })}`);
+  }
+
+  // ---- resolveBudget: a small incremental re-review skips the intent worker (unmeasured default) ----
+  total++;
+  {
+    const inc = (/** @type {any} */ x) => resolveBudget({ dispatchAvailable: true, ...x });
+    const incStd = inc({ routedTier: "standard", runMode: "incremental" });
+    const incQuick = inc({ routedTier: "quick", runMode: "incremental-quick" });
+    const zero = inc({ routedTier: "quick", runMode: "zero-delta" });
+    const fullStd = inc({ routedTier: "standard", runMode: "full" });
+    const incDeep = inc({ routedTier: "deep", runMode: "incremental" });
+    const incStdAsked = inc({ routedTier: "standard", runMode: "incremental", thoroughness: 0.8 });
+    const incStdEffort = inc({ routedTier: "standard", runMode: "incremental", effortHigh: true });
+    const noMode = inc({ routedTier: "standard" });
+    const ok = incStd.topology === "in-context" && incStd.topologyReason === "small-incremental" && incStd.isolatedFinders.length === 0
+      && incQuick.topology === "in-context" && zero.topology === "in-context"
+      && fullStd.topology === "hybrid" && incDeep.topology === "hybrid" && noMode.topology === "hybrid"
+      && incStdAsked.topology === "hybrid" && incStdEffort.topology === "hybrid"
+      // only the topology moves: every other lever of the small-incremental budget is unchanged
+      && incStd.measurabilityLens === noMode.measurabilityLens && incStd.maxVerificationTier === noMode.maxVerificationTier
+      && JSON.stringify(incStd.finders) === JSON.stringify(noMode.finders);
+    if (ok) passed++;
+    else fails.push(`small-incremental topology drifted: ${JSON.stringify({ incStd: [incStd.topology, incStd.topologyReason], incQuick: incQuick.topology, zero: zero.topology, fullStd: fullStd.topology, incDeep: incDeep.topology, asked: incStdAsked.topology, effort: incStdEffort.topology, noMode: noMode.topology })}`);
+  }
+
+  // ---- resolveBudget: a quick/standard preset ask keeps the small-incremental carve-out; deeper asks do not ----
+  total++;
+  {
+    const inc = (/** @type {any} */ x) => resolveBudget({ dispatchAvailable: true, routedTier: "standard", runMode: "incremental", ...x });
+    const q = inc({ thoroughness: 0.4, presetAsk: "quick" });
+    const s = inc({ thoroughness: 0.7, presetAsk: "standard" });
+    const exactQ = inc({ thoroughness: 0.4 });
+    const deepAsk = inc({ thoroughness: 0.85 });
+    const effort = inc({ effortHigh: true, presetAsk: "quick" });
+    const deepTier = inc({ routedTier: "deep", thoroughness: 0.4, presetAsk: "quick" });
+    const ok = q.topology === "in-context" && q.topologyReason === "small-incremental" && s.topology === "in-context"
+      && exactQ.topology === "hybrid" && deepAsk.topology === "hybrid" && effort.topology === "hybrid"
+      && deepTier.topology === "hybrid";
+    if (ok) passed++;
+    else fails.push(`preset-ask carve-out drifted: ${JSON.stringify({ q: q.topology, s: s.topology, exactQ: exactQ.topology, deepAsk: deepAsk.topology, effort: effort.topology, deepTier: deepTier.topology })}`);
+  }
+
+  // ---- resolveBudget: each lens past the first three adds LENS_CALLS (select-lenses.mjs has no cap) ----
+  total++;
+  {
+    const base = resolveBudget({ routedTier: "standard", changedFiles: 22 });
+    const three = resolveBudget({ routedTier: "standard", changedFiles: 22, lensCount: 3 });
+    const five = resolveBudget({ routedTier: "standard", changedFiles: 22, lensCount: 5 });
+    const unknown = resolveBudget({ routedTier: "standard", lensCount: 5 });
+    if (three.toolCalls === base.toolCalls && five.toolCalls === (base.toolCalls ?? 0) + 2 * LENS_CALLS && unknown.toolCalls === null) passed++;
+    else fails.push(`lens budget drifted: ${JSON.stringify({ base: base.toolCalls, three: three.toolCalls, five: five.toolCalls, unknown: unknown.toolCalls })}`);
+  }
+
+  // ---- resolveBudget: finder_passes — one pass by default; two with a dispatch, except on Step 0.8's gates-only path ----
+  total++;
+  {
+    const one = resolveBudget({ routedTier: "deep", changedFiles: 22 });
+    const two = resolveBudget({ routedTier: "deep", changedFiles: 22, finderPasses: 2 });
+    const twoLow = resolveBudget({ thoroughness: 0.5, changedFiles: 8, finderPasses: 2 });
+    const twoSmallInc = resolveBudget({ routedTier: "standard", runMode: "incremental", finderPasses: 2 });
+    const twoNoDispatch = resolveBudget({ routedTier: "deep", changedFiles: 22, finderPasses: 2, dispatchAvailable: false });
+    const twoZero = resolveBudget({ routedTier: "quick", runMode: "zero-delta", finderPasses: 2, priorShaFromState: true });
+    // the GitHub fallback rung: zero-delta against the sticky's commit with no state record, which Step 1.2b reviews in full
+    const twoZeroFallback = resolveBudget({ routedTier: "deep", runMode: "zero-delta", finderPasses: 2, changedFiles: 22 });
+    const three = resolveBudget({ routedTier: "deep", finderPasses: 3 });
+    const ok = one.finderPasses === 1 && one.finderPassesReason === "single" && one.secondPassUnits.length === 0
+      && two.finderPasses === 2 && two.finderPassesRequested === 2 && two.finderPassesReason === "requested"
+      && JSON.stringify(two.secondPassUnits) === '["intent-2","other-finders-2"]'
+      // the call budget grows by half; nothing else on the budget moves
+      && one.toolCalls === 180 && two.toolCalls === 270 && twoLow.toolCalls === 90
+      && JSON.stringify({ ...two, toolCalls: 0, finderPasses: 0, finderPassesRequested: 0, finderPassesReason: "", secondPassUnits: [] })
+        === JSON.stringify({ ...one, toolCalls: 0, finderPasses: 0, finderPassesRequested: 0, finderPassesReason: "", secondPassUnits: [] })
+      // pass 1's topology stays as routed; pass 2 still runs on a small incremental re-review
+      && twoSmallInc.topology === "in-context" && twoSmallInc.finderPasses === 2
+      && twoNoDispatch.finderPasses === 1 && twoNoDispatch.finderPassesRequested === 2
+      && twoNoDispatch.finderPassesReason === "no-dispatch" && twoNoDispatch.secondPassUnits.length === 0
+      && twoNoDispatch.toolCalls === 180
+      && twoZero.finderPasses === 1 && twoZero.finderPassesReason === "zero-delta"
+      && twoZeroFallback.finderPasses === 2 && twoZeroFallback.finderPassesReason === "requested"
+      && JSON.stringify(twoZeroFallback.secondPassUnits) === '["intent-2","other-finders-2"]' && twoZeroFallback.toolCalls === 270
+      && three.finderPasses === 1 && three.finderPassesReason === "single";
+    if (ok) passed++;
+    else fails.push(`finder_passes drifted: ${JSON.stringify({ one: [one.finderPasses, one.toolCalls], two: [two.finderPasses, two.finderPassesReason, two.secondPassUnits, two.toolCalls], twoLow: twoLow.toolCalls, smallInc: [twoSmallInc.topology, twoSmallInc.finderPasses], noDispatch: [twoNoDispatch.finderPasses, twoNoDispatch.finderPassesReason], zero: [twoZero.finderPasses, twoZero.finderPassesReason], zeroFallback: [twoZeroFallback.finderPasses, twoZeroFallback.finderPassesReason], three: three.finderPasses })}`);
+  }
+
+  // ---- resolveBudget: monotonicity — for any t1 < t2, budget(t2) is a
+  // superset of budget(t1) on every lever. No lever may ever regress as
+  // thoroughness rises. ----
+  total++;
+  const grid = Array.from({ length: 11 }, (_, n) => Math.round(n * 10) / 100);
+  const scopeRank = { none: 0, delta: 1, all: 2 };
+  const topoRank = { "in-context": 0, hybrid: 1 };
+  let monotonicityBroken = null;
+  for (let a = 0; a < grid.length && !monotonicityBroken; a++) {
+    for (let b = a + 1; b < grid.length && !monotonicityBroken; b++) {
+      const lo = resolveBudget({ thoroughness: grid[a] });
+      const hi = resolveBudget({ thoroughness: grid[b] });
+      const checks = [
+        [!lo.finders["consumer-impact"] || hi.finders["consumer-impact"], "consumer-impact activation regressed"],
+        [!lo.finders.dependency || hi.finders.dependency, "dependency activation regressed"],
+        [!lo.finders.standards || hi.finders.standards, "standards activation regressed"],
+        [scopeRank[lo.finderScope["consumer-impact"]] <= scopeRank[hi.finderScope["consumer-impact"]], "consumer-impact scope narrowed"],
+        [scopeRank[lo.finderScope.standards] <= scopeRank[hi.finderScope.standards], "standards scope narrowed"],
+        [lo.correctnessVotes <= hi.correctnessVotes, "correctnessVotes regressed"],
+        [topoRank[lo.topology] <= topoRank[hi.topology], "topology regressed toward in-context"],
+        [lo.maxVerificationTier <= hi.maxVerificationTier, "maxVerificationTier regressed"],
+        [lo.holisticEscalationCap <= hi.holisticEscalationCap, "holisticEscalationCap regressed"],
+        [!lo.optimalityLens || hi.optimalityLens, "optimalityLens regressed"],
+        [!lo.measurabilityLens || hi.measurabilityLens, "measurabilityLens regressed"],
+        [!lo.holisticBroadPass || hi.holisticBroadPass, "holisticBroadPass regressed"],
+        [lo.toolCallMultiplier <= hi.toolCallMultiplier, "toolCallMultiplier regressed"],
+      ];
+      const broke = checks.find(([ok]) => !ok);
+      if (broke) monotonicityBroken = `t=${grid[a]} -> t=${grid[b]}: ${broke[1]}`;
+    }
+  }
+  if (!monotonicityBroken) passed++;
+  else fails.push(`monotonicity violated: ${monotonicityBroken}`);
+
+  // ---- depth presets: each preset is the budget of the tier default it is named after ----
+  /** @type {Array<["quick" | "standard" | "deep", "quick" | "standard" | "deep"]>} */
+  const presetTiers = [["quick", "quick"], ["standard", "standard"], ["deep", "deep"]];
+  for (const [preset, tier] of presetTiers) {
+    total++;
+    const viaPreset = resolveBudget({ routedTier: tier, thoroughness: PRESET_THOROUGHNESS[preset] });
+    const viaDefault = resolveBudget({ routedTier: tier });
+    // A defaulted quick routing is lean; every other field matches the preset's column.
+    const blank = { lean: 0, topology: 0, topologyReason: 0, holisticBroadPass: 0, impactImage: 0, isolatedFinders: 0 };
+    if (JSON.stringify({ ...viaPreset, ...blank }) === JSON.stringify({ ...viaDefault, ...blank })) passed++;
+    else fails.push(`preset ${preset} does not match the ${tier} tier default budget`);
+  }
+  total++;
+  const maxB = resolveBudget({ routedTier: "deep", thoroughness: PRESET_THOROUGHNESS.max });
+  if (maxB.maxVerificationTier === 3 && maxB.toolCallMultiplier === 2) passed++;
+  else fails.push(`preset max did not reach tier-3 verification and the x2 budget: ${JSON.stringify(maxB)}`);
+
+  // ---- presetOfThoroughness maps each column edge to the preset that column belongs to ----
+  total++;
+  /** @type {Array<[number, string]>} */
+  const edges = [[0, "quick"], [0.49, "quick"], [0.5, "standard"], [0.79, "standard"], [0.8, "deep"], [0.94, "deep"], [0.95, "max"], [1, "max"]];
+  const badEdge = edges.find(([t, want]) => presetOfThoroughness(t) !== want);
+  if (!badEdge) passed++;
+  else fails.push(`presetOfThoroughness(${badEdge[0]}) !== ${badEdge[1]}`);
+
+  // ---- describeDepth reports a floor lift as `requested -> effective (floor: reason)` ----
+  total++;
+  const lifted = describeDepth({ requested: "quick", source: "cli", budget: resolveBudget({ thoroughness: 0.4, shape: ["infra"] }) });
+  const plain = describeDepth({ source: "default", budget: resolveBudget({ routedTier: "standard" }) });
+  if (lifted.line === "depth quick -> standard (floor: infra)" && lifted.floor === "infra"
+    && plain.line === "depth standard (default)" && plain.floor === null) passed++;
+  else fails.push(`describeDepth drifted: ${JSON.stringify([lifted, plain])}`);
+
+  console.log(`route-depth self-test: ${passed}/${total}`);
+  if (fails.length) {
+    console.log(`✗ route-depth self-test: ${fails.length} failed`);
+    for (const f of fails) console.log(`    ✗ ${f}`);
+    process.exit(1);
+  }
+  console.log(`✓ route-depth self-test: all ${total} cases passed`);
+}
+
+const isEntryPoint = process.argv[1] && process.argv[1].endsWith("route-depth.mjs");
+if (isEntryPoint && process.argv.includes("--self-test")) {
+  selfTest();
+}

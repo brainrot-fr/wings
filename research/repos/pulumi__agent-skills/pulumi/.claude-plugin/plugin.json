@@ -1,0 +1,25 @@
+{
+  "name": "pulumi",
+  "version": "1.0.7",
+  "description": "Entry-point and specialized skills for writing and operating Pulumi infrastructure across CLI, projects, and Pulumi Cloud",
+  "author": {
+    "name": "Pulumi",
+    "url": "https://github.com/pulumi"
+  },
+  "homepage": "https://www.pulumi.com/docs/",
+  "repository": "https://github.com/pulumi/agent-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "pulumi",
+    "overview",
+    "best-practices",
+    "component",
+    "automation-api",
+    "provider-upgrade",
+    "esc",
+    "secrets",
+    "configuration",
+    "package-usage",
+    "debugging"
+  ]
+}
