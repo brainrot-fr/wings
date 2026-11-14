@@ -1,4 +1,4 @@
-This is the batch0 and batch 1, lets continue from last chat.
+this is the batch0 and batch 1, lets continue from last chat.
 
 Analysis of Batch 0 and Batch 1
 Coverage note
@@ -152,3 +152,309 @@ The missing spec-kit persisting-specs.md.
 If you want gstack’s gates used at all, the rendered text of the Confidence Calibration and Test Failure Triage placeholders.
 
 Two decisions I need from you before drafting the house-style spec: do you accept Addy’s anatomy as the base, and do you want the stack-first rule (decision record before spec) locked now or revisited after Batch 2?
+
+tests.md
+MD
+review-army.md
+MD
+plan-completion.md
+MD
+plan-completion_1.md
+MD
+SKILL.md
+MD
+review-sections.md
+MD
+persisting-specs.md
+183 lines
+MD
+shared-code-reuse.md
+35 lines
+MD
+shared-code-reuse_1.md
+35 lines
+MD
+lint_spine.py
+273 lines
+PY
+structure-models.md
+44 lines
+MD
+editorial-common.md
+56 lines
+MD
+check_ids.py
+251 lines
+PY
+memlog.py
+293 lines
+PY
+agents.md
+123 lines
+MD
+testing-patterns.md
+236 lines
+MD
+
+these are the remaining files from batch 1, analyze them and then we will move on with batch 2.
+
+Analysis of the remaining Batch 1 files
+Why these files matter
+
+They sit on one dependency chain. How long artifacts live (persisting-specs.md) constrains the ID rules, the ID rules constrain the linters, and the linters and gstack’s gates define what “done” means. So I analyze them in that order.
+
+Coverage:
+
+shared-code-reuse.md and shared-code-reuse_1.md are byte-identical (the review and ship copies).
+The two plan-completion files are gstack’s review and ship variants.
+SKILL.md, review-army.md, tests.md and review-sections.md are gstack’s review, ship Step 9, ship tests and plan-eng-review.
+This closes all three gaps I flagged last time: the ID linter, persisting-specs.md, and the Confidence Calibration and Test Failure Triage text.
+1. Artifact lifecycle (persisting-specs.md)
+
+Spec Kit offers four models and mandates none: flow-back, flow-forward, living spec, constitution-only.
+
+Recommendation: living spec, with an append-only decision log.
+
+Flow-forward creates a new feature directory per change. That duplicates IDs across directories, which check_ids.py reports as duplicate. It is incompatible with a global ID scheme.
+Constitution-only discards feature artifacts. Wings’ whole purpose is that an agent can open one file later and know what a page, function or table must do. It fails that.
+Flow-back allows silent drift. That is the failure the linters exist to catch.
+Living spec makes spec.md and the per-page, per-function and per-table files the contract. Plan and tasks are disposable derivations. Its stated risk is lost rationale, which the append-only log (section 2, memlog) covers.
+
+Required rule: IDs are never reused or renumbered, and removed items are marked withdrawn rather than deleted. This is exactly what lint_spine.py (monotonic AD ids) and check_ids.py (withdrawn but still referenced) enforce, so the rule and the tooling already agree.
+
+2. Mechanical layer
+check_ids.py: take it, extend it
+
+It is stdlib-only, deterministic and JSON-out, which fits your “no heavy runtimes” rule. Its definition rules are carefully built:
+
+Definitions are headings, first table cells, bold, or - FR-3: list items. Id lists and ranges are references.
+A table that mostly re-cites already-defined ids is treated as a traceability table.
+Fenced code and HTML comments are blanked with line numbers preserved.
+It also checks the Table of Contents against GitHub anchors.
+
+Constraints and gaps that affect the wings design:
+
+Issue	Consequence
+Id pattern is [A-Z][A-Z0-9]{0,5}-\d+	The house scheme must be hyphen plus number: R-12, PG-3, FN-7, TB-2, AD-4. My earlier R<n> form would not match. Readability is recovered by always titling the heading (## FN-7 createInvoice).
+Anything shaped like an id matches	SHA-256, UTF-8 and ISO-8601 land in unknown_prefix. Add --prefixes so wings checks only the prefixes it owns.
+Table heuristic depends on order	A traceability table written before the definitions would define the ids and then collide with them. Rule: define first, trace after.
+withdrawn only reads text right after the defining id	Add a check for superseded by X and that X exists.
+Counts only, no relationships	It cannot say “every R-n has a task and a test”, “every FN cites an R”, or “every TB is used by an FN”. Wings needs typed coverage rules. The defined and referenced maps already hold the data, so this is an extension, not a rewrite.
+Always exits 0 on findings (lint_spine too)	Add --strict for gate use.
+No --help	using-scripts.mdx makes it the agent’s primary interface. Add argparse.
+lint_spine.py: merge into the same tool
+The blank_fences trick (blank, keep newlines) is worth reusing as-is.
+The version-pin check finds Name and Version columns from the header row, so reordered tables still work. This maps directly onto the stack decision record, which no source covers.
+Weakness: the Binds/Prevents/Rule check is a substring test on the lowercased block, so “rules” or “overrule” satisfies “rule”. Require the fields as labeled lines (**Rule:**).
+Drop the convention that the spine must be named after its folder. It is arbitrary.
+Result: one wings-lint with modules: ids, placeholders, version pins, required fields per document type.
+memlog.py: keep the idea, drop the script
+
+Its three invariants are good:
+
+Entries are append-only and chronological.
+It is write-only and blind (each command echoes state, so the caller never re-reads).
+It has no lifecycle status. “Done” or “blocked” is itself an entry, so the chronology stays the single source of truth.
+
+It requires PyYAML plus uv, which breaks the no-dependency rule, and nothing it does needs a script. An agent can append - (decision) … lines to a file. Wings should adopt the format: a .wings/log.md with typed one-line entries (decision, assumption, gap, event). It serves as the rationale record the living-spec model needs and as the resume point for a fresh session.
+
+Contrast with gstack’s decision ledger: it uses mutable records with State/Actual answer/Accepted scope fields. Pick the append-only log for working memory.
+
+3. Document-review lenses (editorial-common.md, structure-models.md)
+Reader calibration (humans vs llm) is the most valuable idea here, because wings’ main readers are agents. The llm rules are: define before use, consistent terminology, no hedging, tables over prose, no unclear antecedents, cite well-known standards instead of re-teaching them. They should be the writing rules for every per-page, function and table file.
+Structure models map cleanly onto wings artifacts:
+Per-page, function and table files: Reference/Database (consistent schema, MECE, random access).
+Spec: Strategic/Pyramid.
+SKILL.md files: Prompt/Task Definition (inputs first, logic separate from data, explicit flow).
+Architecture spine: Explanation.
+Keep the findings table (Pass / Original / Revised / Changes) and the opening one-sentence purpose-and-audience read, which lets the author correct a wrong premise before acting.
+Strip the BMAD templating ({workflow.*}, {skill-root}, word_metrics.py via uv run). Word counts from a script are unnecessary.
+Tension: “content is sacrosanct” versus BMAD’s load-bearing test, which cuts a claim if nothing downstream would decide differently. Resolve it by scope. Editorial lenses never touch content, and the requirements rubric is the only place claims get cut.
+4. Personas and orchestration (agents.md)
+
+The rule is skills = how, personas = who, commands = when. Personas never call personas, and the only endorsed multi-agent pattern is parallel fan-out with a merge step.
+
+Wings is universal, so apply this as: roles are plain Markdown files, fan-out is optional, and the fallback is a labeled sequential pass through the same lenses in fresh sections. Keep roughly three or four lenses. gstack’s review-army dispatches up to ten specialists plus a red team, with batching, adaptive gating and per-reader effort levels, which only makes sense inside its harness.
+
+Gap: Addy’s using-agent-skills and AGENTS.md reference code-simplification, which was not in my Batch 1 list. It is optional but would complete his review chain.
+
+5. Testing (testing-patterns.md, gstack tests.md)
+
+Take from testing-patterns.md:
+
+Arrange-Act-Assert.
+Names as [unit] [behavior] [condition].
+Mock at boundaries only (DB, HTTP, filesystem, external APIs, time). Never mock business logic, validation or pure functions.
+Query by role and label, not test IDs.
+The anti-pattern table.
+
+Problems with it:
+
+It is JS/TS-only. Principles belong in the core skill, and syntax goes in per-stack references loaded by detected stack.
+It lists toBeDefined and toBeTruthy as “common assertions”, while gstack’s bootstrap forbids expect(x).toBeDefined() as meaningless. Wings should forbid weak assertions.
+Its Playwright example asserts a CSS property (text-decoration-line), which is an implementation detail, and its own anti-pattern table flags that.
+
+Take from gstack tests.md:
+
+Markers are evidence for a question, never a command to run. Never execute a candidate test command “to check it”.
+Absent config is not absence of tests. Django keeps tests in <app>/tests.py, Go in *_test.go, Rust in #[test] inside src/.
+Never install a second framework next to a working one.
+Read two or three existing tests for conventions before writing any.
+A lane passes on its test count, not exit 0. Three states: tests_ran: N>0 (pass), 0 (ZERO-RUN, treated as failed), unknown (record it). This is small and prevents a very common false pass.
+Test failure ownership triage. Classify each failure as in-branch or pre-existing. When ambiguous, default to in-branch. In-branch failures stop the work. Pre-existing ones get a choice: fix, log, or skip.
+
+Drop from tests.md: the “100% coverage is the goal” mandate. The gstack plan-eng-review file contradicts it. Its test value bar is the better rule, and every proposed test must answer four questions:
+
+What behavior does it protect?
+What credible regression makes it fail?
+Why does existing coverage not catch that?
+Does it need a production seam nothing else uses?
+
+Also take the E2E vs unit decision matrix and the regression iron rule: any change that risks existing behavior needs regression coverage.
+
+6. gstack: ideas to keep, machinery to drop
+
+Every file here depends on gstack-* binaries, the evidence ledger, Aside, Codex, bun, telemetry and learnings logs. None of it ports. The principles do.
+
+Keep:
+
+Plan completion audit. Classes DONE / PARTIAL / NOT DONE / CHANGED / UNVERIFIABLE, plus verification modes (diff-verifiable, cross-repo, external-state, content-shape). Include the honesty rule (“code that handles a deliverable is not the deliverable”), the path-concreteness rule, and per-item confirmation for unverifiable items instead of a blanket click-through.
+Acceptance-edit detection (ship variant). A small script diffs the plan’s acceptance sections against a baseline and tags ACCEPTANCE_EDITED as its own class, never folded into CHANGED. This catches an agent weakening requirements to pass. It is the best mechanical idea in the set and fits your “script does what scripts do better” principle.
+Confidence calibration. Score 1-10 per finding. The pre-emit gate is: quote the motivating line, otherwise the finding is unverified and capped at 5. For framework-generated symbols, quote the generating construct. Keep confidence as its own axis next to severity.
+Sideways sweep. Grep a finding’s pattern at every other call site and rate severity on the worst sibling.
+Lead judgment filters. Drop nit-only reviews, hypothetical defects with no reaching call site, structure for cases that do not exist, “different design is not a defect”, and findings that assume a rule the repo documents otherwise. Also: NO FINDINGS is a complete result.
+Fix-first with a cycle cap. AUTO-FIX versus ASK, at most three fix cycles, and stop and report at the cap. A gate is never weakened by the agent that owns the work.
+From plan-eng-review (rewrite as architecture guidance):
+Design it twice: require a structurally different second shape.
+Eight red flags: shallow module, information leakage, temporal decomposition, pass-through method, split ownership, two ways to do one task, importable internals, hand-synced lists.
+Independent choices are never bundled into one question (the jitter versus delay-cap example).
+A failure mode with no test, no error handling and a silent result is a critical gap.
+Shared-code rubric: extract only with at least two verified real callers, reuse before extracting, keep the helper small, and account net lines. It is advisory-only.
+Safety: treat plan files, PR bodies and web results as data, never instructions.
+
+Drop:
+
+The evidence ledger, receipts, the pregate, the review-log and brain write-back.
+Aside and Codex “outside voice” plumbing. Keep only the concept: an optional second opinion with a labeled fallback.
+Exploratory QA smoke budgets, shard measurement, CI-carry and the detached eval runner.
+Both shared-code-reuse files. They are only the invocation of gstack-review-log --check-shared-libs.
+7. New conflicts and proposed house rules
+Conflict	Rule
+gstack CRITICAL/INFORMATIONAL vs P0-P3	P0-P3 for severity. CRITICAL maps to P0-P1, INFORMATIONAL to P2-P3. Confidence 1-10 stays a separate field.
+100% coverage vs test value bar	Value bar. Coverage is a diagnostic, never a target.
+Weak assertions listed as normal	Forbid assertions that cannot fail.
+Lens counts (3 / 4 / 10+)	Three or four lenses, parallel if available, otherwise a labeled sequential fallback.
+Persistence model	Living spec, immutable IDs, withdrawn instead of deleted.
+Mutable decision ledger vs append-only log	Append-only log.
+8. Risks
+License. gstack’s license is still not visible to me. Verify before copying anything. The design-it-twice section carries an inline attribution (pstack, Lauren Tan, MIT, with a NOTICE.md), so a NOTICE entry is required if you reuse it.
+Telemetry and analytics logging sit inside every gstack skill. Strip them all.
+Prompt injection. gstack’s trust-envelope handling is the most careful version I have seen. Keep one shared version in the core skill.
+Still unread from Batch 1
+bmad-ux/references/* (the remainder)
+code-simplification (optional)
+
+Neither blocks Batch 2.
+
+Decisions, carried as working assumptions
+
+Say the word if you object, otherwise I carry them forward:
+
+Addy’s section anatomy is the house skill anatomy.
+Stack decision record comes before the spec.
+Living spec with immutable IDs and an append-only log.
+
+Send Batch 2 (database and backend) when ready.
+
+SKILL_1.md
+95 lines
+MD
+creative-tools.md
+19 lines
+MD
+design-md-spec.md
+50 lines
+MD
+headless.md
+37 lines
+MD
+validate.md
+115 lines
+MD
+
+these are the bmad-ux/references/ please analyze them and gstack is mit, i check its license file.
+
+Analysis of bmad-ux (SKILL + references)
+
+Licensing: gstack being MIT closes that flag. The notices still need to carry over where text is reused, and the pstack attribution inside plan-eng-review (Lauren Tan, MIT) still needs a NOTICE entry.
+
+Architectural reasoning
+
+bmad-ux is the first source I have read that solves the frontend-to-requirements handoff, which is where wings’ frontend block plugs into the spine. Its core move is splitting UX into two peer contracts with a clean ownership line:
+
+DESIGN.md owns how it looks (tokens, visual rules).
+EXPERIENCE.md owns how it works (IA, states, flows, accessibility behavior).
+EXPERIENCE.md references DESIGN.md by token name ({colors.primary}), never by value, so each fact has one home.
+Both win over any mock, wireframe or import.
+
+That is the same single-owner and single-writer discipline as the architecture spine and the contract rule. It is also the missing piece for your goal that an agent opens one file and knows what a page must do. EXPERIENCE.md is the closest source to your per-page requirement file, though it is product-wide rather than per-page (see gaps).
+
+What to take
+
+1. The two-spine split and the DESIGN.md format.
+
+Frontmatter tokens (colors, typography, rounded, spacing, components) plus a prose body in locked section order (Brand & Style → Colors → Typography → Layout & Spacing → Elevation & Depth → Shapes → Components → Do’s and Don’ts).
+{path.to.token} references resolve against the YAML structure, so a linter can check them mechanically. This is the same pattern as check_ids.py and belongs in wings-lint.
+It is an open spec (Google Labs, Apache-2.0), not BMAD’s. That removes the trademark concern, and it means you can vendor the spec reference directly and keep the Apache notice and a change mark.
+Inheritance rule: when Foundation names a UI system (shadcn, MUI, native), the spine specifies only the delta. This matters for you specifically: a UI-inexperienced builder should default to shadcn or a native system rather than invent tokens.
+Light/dark either as paired tokens or as separate files, and note: fields for platform-owned values.
+
+2. The EXPERIENCE.md section set. Foundation, Information Architecture, Voice and Tone, Component Patterns (behavioral), State Patterns, Interaction Primitives, Accessibility Floor, Key Flows, plus Inspiration & Anti-patterns and Responsive & Platform when triggered. Invented sections are allowed when they earn their place.
+
+3. Surface closure. The best idea in the set: IA closes only when every stated need has a surface, and every surface has a journey that lands on it. When closure fails, probe; never invent the missing piece. This is a deterministic-enough check to turn into a requirements-to-pages coverage rule.
+
+4. Journeys with a named protagonist and a climax beat. “Mary, mom of three, kids asleep”, not “the user”. Named protagonists also derive the form-factor (Pary on iPad implies an iPad surface), and form-factor must resolve before IA closes.
+
+5. Elicit, never impose. Never volunteer colors or directions. Ask what the stakes are (hobby, internal, consumer, regulated). This conflicts with your stated need: you are not experienced in UI design and want the agent to carry that load. See the conflict below.
+
+6. The rubric walker. Eight categories in two passes, and the pass split is the thing to keep:
+
+Pass 1, mechanical: flow coverage, token completeness, component coverage, state coverage, visual reference coverage. Each is extract, then list misses with locations.
+Pass 2, judgment: bloat and overspecification, inheritance discipline, shape fit. Each gets a verdict (strong, adequate, thin, broken).
+Severity means downstream impact, not fix difficulty.
+Color tokens without hex are critical, because code mirrors the spine.
+Pass 1 is script-shaped. Flow coverage and token completeness especially should be a deterministic check, not a prompt.
+
+7. Reviewer gate, opt-in and lens-selectable. The user picks all, some or none because reviewers are costly. This agrees with what I proposed for the other review skills.
+
+8. Artifact handling. Working artifacts go to .working/, and only the ones a future reader of the spine would open are promoted to mockups/ or wireframes/. Default is leave in .working/. Reviewer and renderer subagents return a compact summary only, never the payload.
+
+9. Reconciliation of imports. User-supplied Figma exports, sketches and brand decks are reconciled against the spines and dropped qualitative ideas are surfaced. Spines win on conflict.
+
+10. Headless contract. A closed status set (complete, partial, blocked), with assumptions[] and open_questions[] kept separate: inferences go in one, human-decision gaps in the other. Never invent persona, brand or scope. This is a clean, portable convention for non-interactive runs.
+
+What to drop
+The whole runtime. uv run resolve_customization.py, resolve_config.py, memlog.py, customize.toml, and every {workflow.*} placeholder. This is the same portability problem as the BMAD stubs: the skill cannot run without BMAD installed, and its own failure path is “install bmad”. Replace with plain paths and fixed defaults.
+The persona and cast layer (John, Mary, Sofia). Names stay out and the ideas stay in.
+Party mode, advanced elicitation and the misroute scan. BMAD-internal.
+{workflow.external_sources}, design_handoffs, external_handoffs. Org-configured registries. Not needed for a single-user suite.
+Creative tools as a registry. The renderer contract is good (subagent writes to .working/ and returns a summary), but wings should hardcode the defaults rather than invent a plugin system: HTML color themes, design directions, wireframes, key-screen mocks.
+Browser-opener commands per OS and the HTML validation report. Markdown output is enough, and a UI-inexperienced user is better served by one readable report.
+The two-assessment machinery of Impeccable is not here; this source’s checks are all coverage plus rubric, so there is nothing else to strip.
+Conflicts and gaps
+Issue	Resolution
+Elicit-only stance vs. your need. BMAD refuses to volunteer a direction. You said you have no UI design experience and want a polished, consistent result.	Wings should default to a recommendation with a reason, not a blank question, and let you override. This agrees with the question protocol already chosen (one question with a recommended answer). The elicit-only rule stays for product intent (who, why, what), where you hold the knowledge. For visual direction, wings proposes.
+Product-wide EXPERIENCE.md vs. per-page files. One file covers IA, states and flows for the whole product. Per-page contracts (data bindings, per-element permissions, states matrix) are not here.	Keep EXPERIENCE.md as the product-wide spine. Add a per-page file (PG-n) that cites it for component and state patterns and adds only what is page-specific: data bindings, per-element permission, and the states matrix. The surface-closure rule then becomes a lint: every PG- has a journey, every need has a PG-.
+Ticket tree dependency. Everything assumes BMAD’s initiative, epic and story files.	Replace with wings’ own artifact chain and the global ID scheme. The requirements still cite flow names verbatim, which check_ids.py can enforce.
+Accessibility. The Accessibility Floor is behavioral (focus order, keyboard, screen reader). Contrast lives in DESIGN.md. The split is sensible, but there is no target level.	Wings picks one: WCAG 2.2 AA, matching the handoff’s frontend decision. Contrast math is scriptable and belongs in the checker.
+ID format. Flows and requirements are named, not numbered.	Flow IDs go on the global scheme (FLOW-n or journeys under US-n) so check_ids.py can verify coverage.
+Severity scale. Critical / high / medium / low.	Map to P0-P3.
+How this changes the plan
+The frontend block can now be specified as two layers: a direction and system step that produces DESIGN.md, and a requirements step that produces EXPERIENCE.md plus per-page files. They share the token reference syntax, which wings-lint checks.
+wings-lint gains two modules: token-reference resolution against DESIGN.md frontmatter, and surface-closure (needs to pages to journeys).
+The review lenses for UX come largely free from the rubric walker; I would keep its eight categories, collapse “visual reference coverage” into a simple orphan-file check, and keep Pass 1 scripted.
+Still unread
+
+None from Batch 1 that blocks anything. bmad-ux/assets/headless-schemas.md and customize.toml are referenced but not sent; neither matters given what is being dropped.
+
+Send Batch 2 when ready.
