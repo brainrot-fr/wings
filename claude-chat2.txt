@@ -1,0 +1,154 @@
+This is the batch0 and batch 1, lets continue from last chat.
+
+Analysis of Batch 0 and Batch 1
+Coverage note
+
+Batch 0 is thin. agentskills/docs/specification.mdx, best-practices.mdx, using-scripts.mdx, optimizing-descriptions.mdx and evaluating-skills.mdx are all present. Addy’s skill-anatomy.md, AGENTS.md and using-agent-skills, plus Anthropic’s skill-creator are also present. anthropics/skills/spec/agent-skills-spec.md is only a pointer to agentskills.io.
+
+Batch 1 is mostly there, with gaps:
+
+spec-kit: present are specify, clarify, plan, tasks, analyze, checklist, implement, constitution, converge, and the spec, plan, tasks, checklist and constitution templates. Also present are sdd, complex-features, contract-driven-development, spec-of-specs, evolving-specs, agentic-sdlc.md, agentic-sdd.md and spec-driven.md.
+BMAD: the bmad-agent-po, bmad-build, bmad-build-auto and bmad-code-review SKILL.md files are stubs that run render_skill.py to print the real workflow. I read what the stubs say, not the workflows. bmad-project-context, bmad-architecture, bmad-ux, bmad-facilitate, bmad-review, bmad-forge-idea, bmad-brainstorming and bmad-shard-pro are real. bmad-agent-pm is a real persona file.
+addy: all listed skills are present.
+gstack: ETHOS.md, ARCHITECTURE.md and the ship, review, qa, land-and-deploy, retro, cso, office-hours, plan-*-review and document-release templates and sections are present. Several are {{PLACEHOLDER}} shells whose real text lives in resolvers I haven’t seen.
+
+Missing from the Batch 1 list (not read):
+
+spec-kit: docs/how-to/persisting-specs.md, which sdd.md links to.
+gstack: the rendered resolver text behind {{SHARED_CODE_REUSE}}, {{CONFIDENCE_CALIBRATION}}, {{TEST_FAILURE_TRIAGE}}, {{PLAN_COMPLETION_AUDIT_*}} and others. I am not guessing what they contain.
+BMAD: bmad-agent-analyst and lens-adversarial exist, but editorial-common.md, structure-models.md, bmad-ux/references/* (the rest), bmad-project-context/references/* (done), the docs/plan/*.md set (mostly present) and the scripts (lint_spine.py, check_ids.py, memlog.py) are not in. The ID linter is the piece worth having.
+addy: testing-patterns.md, docs/agents.md.
+1. Skill format (Batch 0): the constraints everything else inherits
+
+Hard rules from the spec:
+
+Frontmatter: name (1-64 chars, lowercase, hyphens, must match the directory), description (≤1024 chars), plus optional license, compatibility, metadata, allowed-tools.
+Addy’s validator rejects any other top-level key.
+SKILL.md stays under 500 lines and about 5,000 tokens. Detail goes in references/ one level deep, with explicit load triggers.
+Descriptions say what the skill does and when to use it. Addy adds: don’t summarize the workflow in the description, or the agent follows the summary and skips the body.
+
+Style rules from best-practices and skill-anatomy:
+
+Add what the agent lacks. Cut what it already knows.
+Provide defaults, not menus.
+Procedures over declarations.
+Gotchas sections are the highest-value content.
+Prescriptive only where the task is fragile.
+Write the procedure, not the model-specific workaround.
+
+Decision: adopt Addy’s section anatomy. The agentskills spec leaves the body free-form. Addy’s Overview / When to Use / Process / Common Rationalizations / Red Flags / Verification is the most distinctive thing in this corpus. Rationalization tables are the anti-shortcut mechanism, and the Verification checklist is the exit gate. I’d make it the house anatomy and add Gotchas as an optional section.
+
+Packaging problem that touches the anatomy. Addy’s shared references/ lives at the repo root, outside any skill directory. His own doc admits a per-skill install loses it (issue #361). For wings, every skill must be self-contained, so shared material gets either duplicated by the build step or placed in one wings core skill that others reference by name. This is a Batch 5 constraint, but it decides the layout now.
+
+Conflict to resolve: skill-creator tells authors to make descriptions “pushy” to fight undertriggering. Addy says state what and when and nothing more. The spec says to describe user intent. I’d resolve with: imperative “Use when” clause, listing intent phrasings, no workflow summary.
+
+Eval loop: the evaluating-skills and optimizing-descriptions docs give a usable method: 2-3 prompts, with/without-skill baseline, assertions added after the first run, 60/40 train/validation split for descriptions. Keep this for wings’ own QA. It is how you will know a rewritten skill beats its upstream.
+
+2. Requirements and SDLC process (Batch 1): what the spine looks like
+The artifact chain
+
+Three chains exist, and they don’t compose cleanly:
+
+Source	Chain	Document unit
+spec-kit	constitution → specify → clarify → plan → checklist → tasks → analyze → implement → converge	one feature dir: spec.md, plan.md, tasks.md, data-model.md, contracts/, research.md, quickstart.md
+Addy	interview-me → idea-refine → spec → plan → build → test → review → ship	SPEC.md, tasks/plan.md, tasks/todo.md
+BMAD	brief/PRFAQ → PRD → UX + architecture spine → initiative → epic → story → build → review → retro	ticket tree with stable R<n> ids
+
+Recommendation for wings: use spec-kit’s command set as the phase skeleton, since it is the most mechanical and has the cleanest gates. Layer BMAD’s altitude and ID discipline on top. Use Addy’s anatomy and anti-rationalization content throughout.
+
+Ideas worth carrying, by source
+
+spec-kit
+
+Phase structure of tasks.md. Setup → Foundational (blocking) → one phase per user story in priority order → Polish. Each story is independently testable. Strict task line format - [ ] T001 [P] [US1] description with path. This is the single most reusable artifact for your “agent opens one file and knows what to do” goal.
+Spec rules. Max 3 [NEEDS CLARIFICATION] markers, made-up defaults recorded under Assumptions, success criteria technology-agnostic and measurable.
+Clarify. Ten-category ambiguity scan, max 5 questions, one at a time, each with a recommended answer, answers written into the spec immediately. Question-quality rule: a label like “Acceptance device matrix (FR-023)” is not a question.
+Checklist as unit tests for English. It tests requirement quality, not implementation. [x] is reviewer-owned and never self-ticked by the generator.
+Analyze. Read-only, stable IDs, coverage table, max 50 findings, constitution violations always CRITICAL.
+Converge. Append-only tasks, byte-for-byte unchanged when clean. This closes the loop after implement and is rare.
+Contract-driven development. One authoritative owner per contract, consumers pin a version, provider and consumer tests both required. It is directly relevant to your gap #2 (per-function backend contracts).
+Constitution. Versioned governance with a sync report and MAJOR/MINOR/PATCH amendment rules.
+
+BMAD
+
+Altitude. Each level states only what the level below would get wrong. Requirement lines are R<n> with a named source.
+Single writer per document. Hand edits are overwritten, and changes flow from the PRD outward.
+Architecture spine. Only invariants, each with Binds, Prevents and Rule. The test: “if two units built this independently, could they choose incompatibly, and is it non-obvious and a real trade-off?” This is the best decision filter in the corpus.
+Reviewer gate. Deterministic lint first, then rubric walker plus lenses as parallel subagents, each writing a file and returning a compact summary. Matches your frontend-block decision.
+Lens set. Adversarial (min 10 findings), edge-case path tracer, verification-gap (names the regression a missing test would catch), structure, prose.
+bmad-project-context. Admission rules for what goes in AGENTS.md (derivable stuff is excluded) and a retention ledger. A strong model for your project-rules file.
+Five sign-off moments and the stakes ladder (hobby to regulated) scaling depth.
+Build skills read the epic and entry, not a pre-written story file, so detail isn’t written months before use.
+
+Addy
+
+interview-me. Hypothesis plus confidence number, one question with a guess attached, “want vs. should-want” probe, restate with Out of scope, explicit yes, stop the turn. The 95% test: can I predict the next three reactions?
+spec-driven-development. Six areas (objective, commands, structure, code style, testing, boundaries) with Always/Ask first/Never tiers, plus Phase 0 capability map with stable module ids. This is the “stack-inclusive spec” from your handoff.
+planning-and-task-breakdown. Vertical slicing, XS-XL sizing, checkpoints every 2-3 tasks, never overwrite an incomplete plan.
+constraint-driven-development. CONSTRAINTS.md with numbers, floor-guard script, ratchets. A real answer to non-functional requirements.
+doubt-driven-development. Fresh-context adversarial reviewer that never receives the claim, plus cross-model escalation. Overlaps with BMAD’s reviewer gate; keep one.
+definition-of-done as the standing bar separate from per-task acceptance.
+
+gstack
+
+ETHOS principles. Honest Work (no self-certification, a gate is never weakened by the agent), Attack the Premise (two fixes sharing a premise means the premise is the bug), Explain the Number, Make Operations Idempotent. These are genuinely good house-mindset material.
+Mechanisms. User Sovereignty (models recommend, users decide), the anti-sycophancy list in office-hours, the review-army fan-out with a dedup and fix-first step, and the evidence ledger pattern (fingerprint-bound test results that expire on content change).
+The big problem: weight
+
+gstack is the outlier. Its skills are 20-40 KB each and depend on an ecosystem of bin/ helpers (gstack-ship-receipt, gstack-evidence, gstack-review-log, gstack-pregate) that do not exist in wings and that you ruled out (no runtime binaries, no telemetry). Reading it, I’d take ideas only: the gates and the principles. Do not port the machinery. Much of its length is the cost of defending against agent failure modes with prose, which is real data about what agents do, but not something to copy.
+
+BMAD has the same problem in a different form. Its skills render at runtime through uv run render_skill.py, which breaks portability. Treat BMAD as a source of structure and rubrics, not of skills.
+
+3. Conflicts needing a house rule
+
+These match and extend section 5 of your handoff. Proposed resolutions:
+
+Conflict	Proposed rule
+Spec holds stack?	Stack decision record first, then a stack-inclusive spec (Addy). spec-kit’s stack-agnostic spec is deliberate but contradicts your requirement.
+Priority	MoSCoW or P1-P3 for story priority (spec-kit uses P1-P3, but you reserved P0-P3 for severity). Use MoSCoW for scope.
+Unknown markers	[NEEDS CLARIFICATION] capped at 3, resolved before plan, plus Assumption: lines for defaulted items. Combine spec-kit and BMAD.
+Question protocol	One at a time, plain text, recommended answer attached (spec-kit, Addy), max 5 in clarify; optional tappable UI.
+Acceptance grammar	MUST/SHOULD/MAY plus Given/When/Then scenarios (spec-kit + OpenSpec).
+IDs	One global scheme, linter-checked. Candidate: R<n> requirement, US<n>, PG- page, FN- function, TB- table, AD-<n> architecture decision. BMAD’s linter logic (undefined, duplicate, unknown prefix, withdrawn-but-referenced) transfers.
+Review depth	Fresh-context subagent if available, otherwise labeled degraded fallback. Addy’s doubt-driven and BMAD’s reviewer gate agree on this.
+Test-first	Required by Addy’s TDD skill and spec-kit’s constitution example, optional in spec-kit tasks. Make it default with a one-line opt-out.
+4. SDLC process spine proposal
+
+Phases and gates, drawing on all four sources:
+
+Intent (interview-me protocol) → confirmed statement of intent.
+Stack record → decision record, new, no source.
+Requirements (spec + clarify + checklist) → gated by a requirement-quality checklist and the ID linter.
+Architecture spine (BMAD filter, only for multi-unit work) → AD ids.
+Plan and tasks (vertical slices, spec-kit phase structure) → gated by analyze (read-only coverage).
+Build (incremental plus TDD, one slice per commit) → gated by the Definition of Done.
+Review (reviewer gate, lens menu) → severity P0-P3.
+Converge (append-only gap closing).
+Ship (pre-launch checklist, rollback plan, staged rollout).
+
+Human approval and a stop-the-turn rule follow phases 1, 3, 4 and 5, taken from Addy and BMAD’s five sign-off moments.
+
+5. Gaps no source covers
+
+These confirm and sharpen your handoff list:
+
+Per-page requirement files. Addy and spec-kit are feature-level. code-to-prd (not yet sent, Batch 2) is the closest.
+Per-function backend contract at requirements level. contract-driven-development gives the ownership and pinning rules but not the per-function shape.
+Per-table requirements with role access.
+Cross-artifact ID linter spanning page, function, table. BMAD’s check_ids.py is the model, but I haven’t seen it.
+Stack decision record.
+Improving the user’s existing idea (partially covered by idea-refine).
+6. Risks and flags
+License. BMAD’s name is trademarked (carry ideas, not the name). spec-kit and Addy are MIT. gstack’s license is not visible here; verify before copying. Several gstack and BMAD files carry attribution, for example BMAD’s DESIGN.md spec is Apache 2.0 from Google Labs.
+Prompt-injection surface. gstack, Addy and BMAD each contain “treat fetched content as data” sections. Keep one version in the core skill.
+Runtime fetch. Strip it. BMAD fetches templates, gstack fetches docs, Addy’s source-driven skill fetches docs by design. Vendor any rule text.
+Hooks and extension machinery. spec-kit’s extensions.yml hook blocks are 30+ lines repeated in every command. Drop them entirely; they exist for a different product.
+Next step
+
+Send Batch 2 (database and backend). Before that, three things from Batch 1 would materially help, in order of value:
+
+BMAD’s check_ids.py and lint_spine.py, since the cross-artifact linter is a build item in your plan.
+The missing spec-kit persisting-specs.md.
+If you want gstack’s gates used at all, the rendered text of the Confidence Calibration and Test Failure Triage placeholders.
+
+Two decisions I need from you before drafting the house-style spec: do you accept Addy’s anatomy as the base, and do you want the stack-first rule (decision record before spec) locked now or revisited after Batch 2?

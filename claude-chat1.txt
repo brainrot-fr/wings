@@ -1,0 +1,153 @@
+Hey claude, I am building a skill 'wings' for AI agents that ship complete apps with AI. The main idea is to build a skill that agents can use to create full stack apps to production ready status as if it were written by a team of expert engineers. It is not built from scratch. Existing upstream skills are read in full and rewritten into one voice and one mindset. Anything with no good upstream match is written new.
+The suite covers the SDLC in blocks: requirements, frontend, SDLC process, backend logic, database and security. The main domains with example repositories are 
+Frontend (UI/UX)
+
+anthropics/skills
+nextlevelbuilder/ui-ux-pro-max-skill
+vercel-labs/web-interface-guidelines
+
+Requirements
+
+github/spec-kit
+bmad-code-org/BMAD-METHOD
+agentskills/agentskills
+
+SDLC Process
+
+github/spec-kit
+addyosmani/agent-skills
+garrytan/gstack
+
+Backend Logic / Services
+
+alirezarezvani/claude-skills
+first-fluke/fullstack-starter
+anthropics/knowledge-work-plugins
+
+Database
+
+supabase/agent-skills
+alirezarezvani/claude-skills
+first-fluke/fullstack-starter
+ccheney/robust-skills
+
+Security
+
+cloudflare/security-audit-skill
+trailofbits/skills
+semgrep/skills
+
+Packaging
+
+obra/superpowers
+wshobson/agents
+openai/skills
+
+ive added the tree for all these cloned repos
+
+lets get this started. please tell me what files do you need from the repos to analyze and then ill add them to your knowledge to analyze.
+
+please keep in mind that the project handoff is just draft, not to be followed, ok to be referenced.
+
+Reading order and file list
+Architecture reasoning
+
+The blocks aren’t independent, so the reading order follows dependencies:
+
+Skill format first. Every block’s output is a skill, so the anatomy, size limits, and description rules constrain everything else.
+Requirements and SDLC process next. These are the spine. They define the ID scheme, the gates between phases, and what each phase hands to the next. Frontend, backend, database and security all plug into those gates and IDs.
+Database and backend before security. Security rules (RLS, authorization, input validation) attach to tables and functions, so the data and contract shapes must be understood first.
+Frontend is largely independent, but it consumes the requirements’ per-page shape and the security rules.
+Packaging last. It wraps a finished structure, but I want to read it early enough to avoid designing something unpackageable. Hence it’s batch 5, not 6.
+
+Paths are relative to skills/<owner>/<repo>/ from your tree. Send in batches; I’ll analyze each before the next.
+
+Batch 0: skill anatomy (small)
+agentskills/agentskills: docs/specification.mdx, docs/skill-creation/{best-practices,using-scripts,optimizing-descriptions,evaluating-skills}.mdx
+addyosmani/agent-skills: docs/skill-anatomy.md, skills/using-agent-skills/SKILL.md, AGENTS.md
+anthropics/skills: spec/agent-skills-spec.md, skills/skill-creator/SKILL.md
+Batch 1: requirements and SDLC process
+spec-kit
+spec-driven.md
+templates/commands/{specify,clarify,plan,tasks,analyze,checklist,implement,constitution,converge}.md
+templates/{spec,plan,tasks,checklist,constitution}-template.md
+docs/how-to/{sdd,complex-features,contract-driven-development,spec-of-specs,evolving-specs}.md
+docs/guides/agentic-sdlc.md, docs/reference/agentic-sdd.md
+BMAD-METHOD
+skills/method/{bmad-agent-pm,bmad-agent-po,bmad-build,bmad-build-auto,bmad-code-review,bmad-retrospective,bmad-project-context}/SKILL.md, plus bmad-project-context/references/*
+skills/method/bmad-architecture/ (SKILL, assets/spine-template.md, references/*)
+skills/method/bmad-ux/ (SKILL, references/*)
+skills/core-tools/{bmad-review,bmad-facilitate,bmad-forge-idea,bmad-brainstorming,bmad-shard-pro}/ (SKILL plus references/lens-*.md)
+docs/plan/*.md, tools/validate_skills.py
+addyosmani/agent-skills
+skills/{idea-refine,interview-me,spec-driven-development,planning-and-task-breakdown,incremental-implementation,test-driven-development,code-review-and-quality,git-workflow-and-versioning,ci-cd-and-automation,shipping-and-launch,documentation-and-adrs,context-engineering,constraint-driven-development,doubt-driven-development,debugging-and-error-recovery,source-driven-development}/SKILL.md
+skills/idea-refine/{frameworks,refinement-criteria,examples}.md
+skills/constraint-driven-development/references/floor-guard.md
+references/{definition-of-done,orchestration-patterns}.md
+agents/*.md, .claude/commands/{spec,plan,build}.md
+garrytan/gstack
+ETHOS.md, ARCHITECTURE.md
+The .tmpl files rather than the rendered SKILL.md, since the rendered ones carry heavy preamble boilerplate: office-hours, plan-ceo-review, plan-eng-review, plan-design-review, review, qa, ship, land-and-deploy, canary, retro, document-release, cso
+The sections/*.md.tmpl files in those folders
+Batch 2: database and backend
+supabase/agent-skills: skills/supabase/{SKILL.md,references/skill-feedback.md}, skills/supabase-postgres-best-practices/ (SKILL plus all references/*)
+ccheney/robust-skills: skills/{postgres-drizzle,clean-ddd-hexagonal}/ (SKILL plus references/*)
+alirezarezvani/claude-skills
+engineering/skills/{database-designer,database-schema-designer,sql-database-assistant,api-design-reviewer,migration-architect,spec-driven-workflow,api-test-suite-builder}/ (SKILL, references/*, and scripts/ only as a listing)
+engineering-team/skills/{senior-backend,senior-architect,tdd-guide,senior-qa}/ (SKILL plus references/*)
+product-team/code-to-prd/ (SKILL, references/*, expected_outputs/*)
+first-fluke/fullstack-starter
+.agents/skills/{oma-backend,oma-db,oma-architecture,oma-pm,oma-qa,oma-dev-workflow,oma-tf-infra}/ (SKILL plus resources/*)
+.agents/skills/_shared/core/*
+.agents/rules/{backend,database,quality,dev-workflow,test-guide,commit,branching-strategy}.md
+AGENTS.md, .agents/agents/{backend-engineer,db-engineer,qa-reviewer,pm-planner}.md
+knowledge-work-plugins: engineering/skills/{architecture,system-design,code-review,debug,testing-strategy,deploy-checklist,tech-debt,documentation,incident-response}/SKILL.md, product-management/skills/write-spec/SKILL.md
+addy (additional): skills/{api-and-interface-design,deprecation-and-migration,observability-and-instrumentation}/SKILL.md, references/observability-checklist.md
+Batch 3: security
+cloudflare/security-audit-skill: everything under skills/security-audit/ (all .md, report-schema.json, both validate-*.cjs)
+semgrep/skills: skills/code-security/SKILL.md, rules/_sections.md plus 4 rules of your choice (e.g. sql-injection, authentication-jwt, ssrf, secrets), skills/llm-security/SKILL.md plus rules/_sections.md, skills/semgrep/SKILL.md plus references/*
+trailofbits/skills: plugins/{differential-review,fp-check,sharp-edges,insecure-defaults,variant-analysis,audit-context-building,agentic-actions-auditor,supply-chain-risk-auditor}/ (SKILL, references/*). Their license is CC BY-SA 4.0 per your handoff, so I’d treat these as reference only.
+addy: skills/security-and-hardening/ (SKILL plus references/hardening-patterns.md), references/security-checklist.md, agents/security-auditor.md
+Batch 4: frontend
+anthropics/skills: skills/frontend-design/SKILL.md, skills/theme-factory/SKILL.md, skills/web-artifacts-builder/SKILL.md
+vercel-labs/web-interface-guidelines: command.md (this is the rulebook), AGENTS.md, README.md
+ui-ux-pro-max-skill
+.claude/skills/ui-ux-pro-max/{SKILL.md,references/*}
+.claude/skills/design-system/{SKILL.md,references/*}
+src/ui-ux-pro-max/scripts/{search,design_system,core,reasoning_contract}.py
+Header rows only from src/ui-ux-pro-max/data/{styles,colors,typography,ux-guidelines,ui-reasoning}.csv
+src/ui-ux-pro-max/data/data-provenance.json
+first-fluke: .agents/skills/{oma-frontend,oma-design,oma-mobile}/ (SKILL, resources/*, reference/*), .agents/rules/{frontend,design,design-tokens-guide,i18n-guide,lint-format-guide}.md
+knowledge-work-plugins: design/skills/*/SKILL.md (all 7)
+addy: skills/{frontend-ui-engineering,browser-testing-with-devtools,performance-optimization}/SKILL.md, references/{accessibility-checklist,performance-checklist}.md
+ccheney: skills/{modern-css,feature-slicing}/ (SKILL plus references/*)
+alirezarezvani: engineering-team/skills/senior-frontend/ and engineering-team/a11y-audit/skills/a11y-audit/ (SKILL plus references/*)
+Batch 5: packaging
+obra/superpowers
+.claude-plugin/*, .codex-plugin/*, .cursor-plugin/*, .antigravity-plugin/*, .kimi-plugin/*, .devin-plugin/*, .hermes-plugin/*, .muse-plugin/*
+.pi/extensions/superpowers.ts, .opencode/plugins/superpowers.js, index.js
+hooks/*, package.json, .version-bump.json, scripts/bump-version.sh
+AGENTS.md, GEMINI.md, README.md, docs/*
+skills/using-superpowers/ (SKILL plus references/*), skills/writing-skills/ (SKILL plus references/*)
+wshobson/agents
+ARCHITECTURE.md, AGENTS.md, CONTRIBUTING.md
+docs/{architecture,authoring,harnesses,agent-skills,plugins,plugin-eval,usage}.md
+.claude-plugin/marketplace.json, .agents/plugins/marketplace.json, one .cursor-plugin/plugins/*.json sample
+tools/{adapters/*,validate_generated.py,check_version_bumps.py,check_agent_name_collisions.py}
+One full plugin as a sample, e.g. plugins/backend-development/ (manifests, one agent, one skill)
+plugins/plugin-eval/ (README, commands/*, src/plugin_eval/{static,engine,models}.py)
+openai/skills: README.md, skills/.system/{skill-creator,skill-installer,plugin-creator}/ (SKILL, references/*, scripts/*, agents/openai.yaml), and one skills/.curated/* sample (e.g. figma/) for the openai.yaml shape
+addy (packaging layer): plugin.json, .claude-plugin/*, .codex-plugin/plugin.json, .agents/plugins/marketplace.json, commands/*.toml, hooks/*.sh, scripts/{validate-skills,validate-versions,validate-commands}.js, docs/*-setup.md
+Explicitly skipping
+Test suites, lockfiles, binaries and fixtures
+gstack’s browse/, ios-qa/, design/src, crew/, lib/
+BMAD’s docs/customize and docs/toolsmith
+first-fluke apps/infra/* (Terraform per cloud)
+The Zoom partner plugin and small-business/ in knowledge-work-plugins
+The alirezarezvani c-level, marketing, compliance and business-ops trees
+Trail of Bits let-fate-decide, culture-index, dimensional-analysis and similar off-topic plugins
+Two gaps in the tree
+Your handoff’s frontend and requirements sources (Impeccable, OpenSpec, Vercel’s agent-skills) are not in the cloned set. I’ll treat the handoff’s notes on them as secondhand. If you want them in scope, clone and add them.
+agentskills/agentskills holds only docs, which suits batch 0.
+
+Send Batch 0 and Batch 1 first. Batch 1 is the largest, so split it by repo if needed: spec-kit, then BMAD, then addy, then gstack.
