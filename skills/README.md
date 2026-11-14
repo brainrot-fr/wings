@@ -4,7 +4,10 @@ These are curated skill files from the upstream repositories, stored as regular 
 
 - [anthropics/skills](./anthropics/skills/) — [upstream](https://github.com/anthropics/skills)
 - [nextlevelbuilder/ui-ux-pro-max-skill](./nextlevelbuilder/ui-ux-pro-max-skill/) — [upstream](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
+- [pbakaus/impeccable](./pbakaus/impeccable/) — [upstream](https://github.com/pbakaus/impeccable)
 - [vercel-labs/web-interface-guidelines](./vercel-labs/web-interface-guidelines/) — [upstream](https://github.com/vercel-labs/web-interface-guidelines)
+- [vercel-labs/agent-skills](./vercel-labs/agent-skills/) — [upstream](https://github.com/vercel-labs/agent-skills)
+- [Fission-AI/OpenSpec](./Fission-AI/OpenSpec/) — [upstream](https://github.com/Fission-AI/OpenSpec)
 - [github/spec-kit](./github/spec-kit/) — [upstream](https://github.com/github/spec-kit)
 - [bmad-code-org/BMAD-METHOD](./bmad-code-org/BMAD-METHOD/) — [upstream](https://github.com/bmad-code-org/BMAD-METHOD)
 - [agentskills/agentskills](./agentskills/agentskills/) — [upstream](https://github.com/agentskills/agentskills)
