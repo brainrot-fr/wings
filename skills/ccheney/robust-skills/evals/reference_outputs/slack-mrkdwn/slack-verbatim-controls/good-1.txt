@@ -1,5 +1,0 @@
-{
-  "type": "mrkdwn",
-  "text": "R&amp;D &lt;!channel&gt; &lt;https://bad.example|click&gt;",
-  "verbatim": true
-}

@@ -1,1 +1,0 @@
-export function literalPattern(text){return new RegExp("^"+text+"$");}

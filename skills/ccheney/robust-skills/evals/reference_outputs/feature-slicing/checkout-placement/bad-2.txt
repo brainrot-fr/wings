@@ -1,5 +1,0 @@
-{
-  "form_path": "src/pages/checkout/ui/form.ts",
-  "validation_path": "src/pages/checkout/model/validation.ts",
-  "imports": []
-}

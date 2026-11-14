@@ -1,1 +1,0 @@
-.card{display:flex;gap:16px}.copy{flex:1}.title{white-space:nowrap}body{overflow-x:hidden}

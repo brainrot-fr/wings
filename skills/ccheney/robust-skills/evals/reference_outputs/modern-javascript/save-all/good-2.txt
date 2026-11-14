@@ -1,1 +1,0 @@
-export async function saveAll(items,save){const jobs=[];for(const item of items)jobs.push(save(item));return await Promise.all(jobs);}

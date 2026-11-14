@@ -1,4 +1,0 @@
-classDiagram
-VIP <|-- Customer
-Customer : +String name
-Customer : +tier() String

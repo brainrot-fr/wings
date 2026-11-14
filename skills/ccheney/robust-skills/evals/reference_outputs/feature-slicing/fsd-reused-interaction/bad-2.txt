@@ -1,8 +1,0 @@
-{
-  "interaction_path": "src/features/add-to-cart",
-  "entity_path": "src/shared/product",
-  "page_imports": [
-    "catalog",
-    "recommendations"
-  ]
-}

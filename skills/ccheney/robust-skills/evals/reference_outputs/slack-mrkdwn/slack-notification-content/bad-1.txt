@@ -1,3 +1,0 @@
-{
-  "text": "Deployment 42 failed in production. Rollback: https://example.com/rollback/42"
-}

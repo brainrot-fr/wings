@@ -1,7 +1,0 @@
-stateDiagram-v2
- [*] --> Draft
- Draft --> Submitted: submit
- Submitted --> Approved: approve
- Approved --> Rejected: reject
- Approved --> [*]
- Rejected --> [*]

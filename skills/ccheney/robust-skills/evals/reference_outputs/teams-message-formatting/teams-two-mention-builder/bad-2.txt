@@ -1,1 +1,0 @@
-export const buildMentions=users=>({body:{contentType:'text',content:users.map(u=>u.name).join(', ')},mentions:[]});

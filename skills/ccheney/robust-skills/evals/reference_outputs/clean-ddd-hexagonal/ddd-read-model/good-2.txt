@@ -1,6 +1,0 @@
-{
-  "read_strategy": "projection",
-  "write_source": "postgresql",
-  "event_sourcing": false,
-  "new_microservices": []
-}

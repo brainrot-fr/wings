@@ -1,3 +1,0 @@
-flowchart TD
- C{Eligible?} --> A[Approve]
- C --> R[Reject]

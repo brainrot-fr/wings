@@ -1,3 +1,0 @@
-{
-  "text": "Deployment 42 failed. Owner: Ada. Rollback: https://example.com/rollback/42"
-}

@@ -1,9 +1,0 @@
-erDiagram
- USER ||--o{ PROFILE : has
- USER {
- uuid id PK
- }
- PROFILE {
- uuid id PK
- uuid user_id FK, UK
- }

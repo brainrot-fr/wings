@@ -1,1 +1,0 @@
-export const owns=(record,key)=>record.hasOwnProperty(key);

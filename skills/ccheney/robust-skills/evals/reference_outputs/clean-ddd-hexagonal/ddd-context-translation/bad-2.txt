@@ -1,9 +1,0 @@
-{
-  "boundary_owner": "shipping_adapter",
-  "mappings": {
-    "READY": "ready_to_dispatch",
-    "MOVING": "in_transit",
-    "DONE": "delivered"
-  },
-  "expose_vendor_dto": true
-}

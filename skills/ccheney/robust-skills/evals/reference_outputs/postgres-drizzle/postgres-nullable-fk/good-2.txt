@@ -1,1 +1,0 @@
-ALTER TABLE orders ADD COLUMN customer_id uuid; ALTER TABLE orders ADD FOREIGN KEY(customer_id) REFERENCES customers(id) ON DELETE NO ACTION;

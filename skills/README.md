@@ -1,6 +1,6 @@
 # Skill repository snapshots
 
-These upstream repositories are included as regular files so they can be browsed directly on GitHub. Each snapshot is stored under its owner and repository name. Any upstream license and attribution files are retained.
+These are curated skill files from the upstream repositories, stored as regular files under each owner and repository name. Each collection retains its `SKILL.md` entrypoints and locally referenced support files; GitHub Actions and unrelated project files have been removed. For repositories without a `SKILL.md`, the core specification or guideline documents are retained. Upstream license and attribution files are kept where provided.
 
 - [anthropics/skills](./anthropics/skills/) — [upstream](https://github.com/anthropics/skills)
 - [nextlevelbuilder/ui-ux-pro-max-skill](./nextlevelbuilder/ui-ux-pro-max-skill/) — [upstream](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)

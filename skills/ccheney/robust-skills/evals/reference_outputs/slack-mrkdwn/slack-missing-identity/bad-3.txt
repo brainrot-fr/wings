@@ -1,7 +1,0 @@
-{
-  "status": "needs_identity",
-  "missing": [
-    "display_name"
-  ],
-  "text": "Ada, please review release 42."
-}

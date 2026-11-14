@@ -1,2 +1,0 @@
-load("@rules_cc//cc:cc_library.bzl","cc_library")
-cc_library(name="auth",srcs=["auth.cc"],visibility=["//visibility:public"])

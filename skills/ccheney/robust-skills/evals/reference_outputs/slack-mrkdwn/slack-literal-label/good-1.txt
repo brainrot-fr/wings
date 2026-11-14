@@ -1,5 +1,0 @@
-{
-  "type": "plain_text",
-  "text": "R&D <ops> \"ready\"",
-  "emoji": true
-}

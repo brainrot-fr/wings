@@ -1,1 +1,0 @@
-.action:focus{background:#0055cc;outline:none}

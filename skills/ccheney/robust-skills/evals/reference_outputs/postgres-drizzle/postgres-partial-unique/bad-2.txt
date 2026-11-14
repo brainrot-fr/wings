@@ -1,1 +1,0 @@
-CREATE INDEX users_live_email ON users(email) WHERE deleted_at IS NULL;

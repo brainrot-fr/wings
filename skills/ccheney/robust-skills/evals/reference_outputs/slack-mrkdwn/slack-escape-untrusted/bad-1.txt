@@ -1,1 +1,0 @@
-export const escapeMrkdwn = text => text.replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('&','&amp;');
