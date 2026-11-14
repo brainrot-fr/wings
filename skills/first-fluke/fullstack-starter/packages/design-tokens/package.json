@@ -1,0 +1,24 @@
+{
+  "name": "@workspace/design-tokens",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node --import=tsx scripts/build.ts",
+    "build:css": "node --import=tsx scripts/build-css.ts",
+    "build:flutter": "node --import=tsx scripts/build-forui-theme.ts",
+    "dev": "node --import=tsx scripts/watch.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "es-toolkit": "^1.52.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.14",
+    "@types/node": "^26.6.2",
+    "chokidar": "^5.0.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7",
+    "vitest": "^5.0.1"
+  }
+}

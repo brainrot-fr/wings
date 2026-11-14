@@ -1,0 +1,113 @@
+[project]
+name = "api"
+version = "0.1.0"
+description = "Litestar backend API"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "litestar[standard,opentelemetry]>=2.25.0",
+    "sqlalchemy[asyncio]>=2.0.54",
+    "alembic>=1.20.0",
+    "pydantic-settings>=2.15.0",
+    "asyncpg>=0.31.0",
+    "python-multipart>=0.0.32",
+    "httpx>=0.28.1",
+    "tenacity>=9.1.4",
+    "redis>=8.1.0",
+    "structlog>=26.1.0",
+    "opentelemetry-api>=1.44.0",
+    "opentelemetry-sdk>=1.44.0",
+    "opentelemetry-instrumentation-sqlalchemy>=0.65b0",
+    "opentelemetry-instrumentation-httpx>=0.65b0",
+    "opentelemetry-instrumentation-redis>=0.65b0",
+    "opentelemetry-exporter-otlp>=1.44.0",
+    "jwcrypto>=1.6.1",
+    "psycopg2-binary>=2.9.13",
+    "bcrypt>=5.0.0",
+    "webauthn>=3.0.0",
+]
+
+# Optional GenAI SDK auto-instrumentation (OTel GenAI semconv).
+# Install the one matching AI_PROVIDER, e.g. `uv sync --extra genai-openai`.
+# NOTE: as of 2026-Q2 these two cannot be installed together — openai-v2 pins
+# opentelemetry-util-genai>=0.4b0 while google-genai pins <0.4b0. The runtime
+# (src/lib/ai/telemetry.py) import-guards both, so absence is a safe no-op.
+[project.optional-dependencies]
+genai-openai = ["opentelemetry-instrumentation-openai-v2>=2.4b0"]
+genai-google = ["opentelemetry-instrumentation-google-genai>=1.1b1"]
+# Object storage backend (STORAGE_BACKEND="azure"). azure-identity enables
+# managed/workload identity; connection-string and shared-key auth need only
+# azure-storage-blob. Install with `uv sync --extra storage-azure`.
+storage-azure = [
+    "azure-storage-blob>=12.30.3",
+    "azure-identity>=1.25.3",
+    "aiohttp>=3.14.3",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16.8",
+    "poethepoet>=0.48.0",
+    "pyrefly>=1.3.2",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "pytest-cov>=7.1.0",
+    "factory-boy>=3.3.3",
+    "aiosqlite>=0.22.1",
+    "pytest-xdist>=3.8.0",
+]
+
+[tool.uv]
+managed = true
+
+[tool.poe.tasks]
+dev = "litestar --app src.main:app run --reload --port 8000"
+start = "litestar --app src.main:app run --host 0.0.0.0 --port 8000"
+
+# Database
+migrate = "alembic upgrade head"
+"migrate-create" = "alembic revision --autogenerate -m"
+"migrate-down" = "alembic downgrade -1"
+
+# Linting & Formatting
+lint = "ruff check --fix --unsafe-fixes ."
+format = "ruff format ."
+check = ["lint", "format"]
+
+# Type checking
+typecheck = "pyrefly check"
+
+# All checks
+"all-checks" = ["check", "typecheck"]
+
+# Testing
+test = "pytest tests/ -n 4"
+"test:ci" = "pytest tests/ -q"
+"test:cov" = "pytest tests/ --cov=src --cov-report=html"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.pyrefly]
+python-version = "3.14"
+project-includes = ["src"]
+search-path = ["."]
+preset = "strict"
+check-unannotated-defs = true
+# Pydantic models are supported natively.
+# Preserve import exceptions for untyped and optional SDKs.
+ignore-missing-imports = [
+    "asyncpg.*",
+    "redis.asyncio.*",
+    "jwcrypto.*",
+    "opentelemetry.instrumentation.openai_v2.*",
+    "opentelemetry.instrumentation.google_genai.*",
+    "azure.*",
+]
+# Preserve the previous treatment of untyped crypto SDK modules.
+replace-untyped-imports-with-any = ["jwcrypto.*"]
+
+[tool.pyrefly.errors]
+no-any-return = "error"
+unannotated-return = "error"

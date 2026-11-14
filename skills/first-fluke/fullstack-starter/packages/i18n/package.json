@@ -1,0 +1,17 @@
+{
+  "name": "@workspace/i18n",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node --import=tsx scripts/build.ts",
+    "build:web": "node --import=tsx scripts/build.ts --target=web",
+    "build:mobile": "node --import=tsx scripts/build.ts --target=mobile"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.14",
+    "@types/node": "^26.6.2",
+    "tsx": "^4.23.15",
+    "typescript": "^7"
+  }
+}

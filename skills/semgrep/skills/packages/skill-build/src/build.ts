@@ -1,0 +1,247 @@
+#!/usr/bin/env node
+/**
+ * Build script to compile individual rule files into AGENTS.md
+ *
+ * Usage: tsx src/build.ts [skill-name]
+ * If no skill name provided, defaults to 'code-security'
+ */
+
+import { readdir, readFile, writeFile } from 'fs/promises'
+import { join } from 'path'
+import { Rule, Section, GuidelinesDocument, ImpactLevel } from './types.js'
+import { parseRuleFile, RuleFile } from './parser.js'
+import { RULES_DIR, METADATA_FILE, OUTPUT_FILE, SKILL_NAME, validateSkillExists } from './config.js'
+import { parseSectionsFile } from './sections.js'
+
+/**
+ * Convert skill name to title case for display
+ */
+function skillNameToTitle(skillName: string): string {
+  return skillName
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
+/**
+ * Generate markdown from rules
+ */
+function generateMarkdown(
+  sections: Section[],
+  metadata: {
+    version: string
+    organization: string
+    date: string
+    abstract: string
+    references?: string[]
+  },
+  skillName: string
+): string {
+  const title = skillNameToTitle(skillName)
+  let md = `# ${title}\n\n`
+  md += `**Version ${metadata.version}**  \n`
+  md += `${metadata.organization}  \n`
+  md += `${metadata.date}\n\n`
+  md += `> **Note:**  \n`
+  md += `> This document is mainly for agents and LLMs to follow when maintaining,  \n`
+  md += `> generating, or refactoring codebases with a focus on security best practices. Humans  \n`
+  md += `> may also find it useful, but guidance here is optimized for automation  \n`
+  md += `> and consistency by AI-assisted workflows.\n\n`
+  md += `---\n\n`
+  md += `## Abstract\n\n`
+  md += `${metadata.abstract}\n\n`
+  md += `---\n\n`
+  md += `## Table of Contents\n\n`
+
+  // Generate TOC
+  sections.forEach((section) => {
+    md += `${section.number}. [${section.title}](#${
+      section.number
+    }-${section.title.toLowerCase().replace(/\s+/g, '-')}) — **${
+      section.impact
+    }**\n`
+    section.rules.forEach((rule) => {
+      // GitHub generates anchors from the full heading text: "1.1 Title" -> "#11-title"
+      const anchor = `${rule.id} ${rule.title}`
+        .toLowerCase()
+        .replace(/\s+/g, '-')
+        .replace(/[^\w-]/g, '') // Remove special characters except hyphens
+      md += `   - ${rule.id} [${rule.title}](#${anchor})\n`
+    })
+  })
+
+  md += `\n---\n\n`
+
+  // Generate sections
+  sections.forEach((section) => {
+    md += `## ${section.number}. ${section.title}\n\n`
+    md += `**Impact: ${section.impact}${
+      section.impactDescription ? ` (${section.impactDescription})` : ''
+    }**\n\n`
+    if (section.introduction) {
+      md += `${section.introduction}\n\n`
+    }
+
+    section.rules.forEach((rule) => {
+      md += `### ${rule.id} ${rule.title}\n\n`
+      md += `**Impact: ${rule.impact}${
+        rule.impactDescription ? ` (${rule.impactDescription})` : ''
+      }**\n\n`
+      md += `${rule.explanation}\n\n`
+
+      rule.examples.forEach((example) => {
+        if (example.description) {
+          md += `**${example.label}: ${example.description}**\n\n`
+        } else {
+          md += `**${example.label}:**\n\n`
+        }
+        // Only generate code block if there's actual code
+        if (example.code && example.code.trim()) {
+          md += `\`\`\`${example.language || 'typescript'}\n`
+          md += `${example.code}\n`
+          md += `\`\`\`\n\n`
+        }
+        if (example.additionalText) {
+          md += `${example.additionalText}\n\n`
+        }
+      })
+
+      if (rule.references && rule.references.length > 0) {
+        md += `Reference: ${rule.references
+          .map((ref) => `[${ref}](${ref})`)
+          .join(', ')}\n\n`
+      }
+    })
+
+    md += `---\n\n`
+  })
+
+  // Add references section
+  if (metadata.references && metadata.references.length > 0) {
+    md += `## References\n\n`
+    metadata.references.forEach((ref, i) => {
+      md += `${i + 1}. [${ref}](${ref})\n`
+    })
+  }
+
+  return md
+}
+
+/**
+ * Main build function
+ */
+async function build() {
+  try {
+    // Validate skill exists
+    validateSkillExists()
+
+    console.log(`Building AGENTS.md for skill: ${SKILL_NAME}`)
+    console.log(`Rules directory: ${RULES_DIR}`)
+    console.log(`Output file: ${OUTPUT_FILE}`)
+
+    // Read all rule files (exclude files starting with _ and README.md)
+    const files = await readdir(RULES_DIR)
+    const ruleFiles = files
+      .filter(
+        (f) => f.endsWith('.md') && !f.startsWith('_') && f !== 'README.md'
+      )
+      .sort() // Sort filenames for consistent ordering across systems
+
+    const ruleData: RuleFile[] = []
+    for (const file of ruleFiles) {
+      const filePath = join(RULES_DIR, file)
+      try {
+        const parsed = await parseRuleFile(filePath)
+        ruleData.push(parsed)
+      } catch (error) {
+        console.error(`Error parsing ${file}:`, error)
+      }
+    }
+
+    // Group rules by section
+    const sectionsMap = new Map<number, Section>()
+
+    ruleData.forEach(({ section, rule }) => {
+      if (!sectionsMap.has(section)) {
+        sectionsMap.set(section, {
+          number: section,
+          title: `Section ${section}`, // Will be overridden by section metadata
+          impact: rule.impact,
+          rules: [],
+        })
+      }
+      sectionsMap.get(section)!.rules.push(rule)
+    })
+
+    // Sort rules within each section by title (using en-US locale for consistency across environments)
+    sectionsMap.forEach((section) => {
+      section.rules.sort((a, b) =>
+        a.title.localeCompare(b.title, 'en-US', { sensitivity: 'base' })
+      )
+
+      // Assign IDs based on sorted order
+      section.rules.forEach((rule, index) => {
+        rule.id = `${section.number}.${index + 1}`
+        rule.subsection = index + 1
+      })
+    })
+
+    // Convert to array and sort
+    const sections = Array.from(sectionsMap.values()).sort(
+      (a, b) => a.number - b.number
+    )
+
+    // Read section metadata from _sections.md using shared parser
+    try {
+      const sectionMetadata = await parseSectionsFile()
+
+      for (const meta of sectionMetadata) {
+        const section = sections.find((s) => s.number === meta.number)
+        if (section) {
+          section.title = meta.title
+          section.impact = meta.impact
+          section.introduction = meta.description
+        }
+      }
+    } catch (error) {
+      console.warn(
+        'Warning: Could not read _sections.md, using defaults',
+        error
+      )
+    }
+
+    // Read metadata
+    let metadata
+    try {
+      const metadataContent = await readFile(METADATA_FILE, 'utf-8')
+      metadata = JSON.parse(metadataContent)
+    } catch {
+      // Generate default metadata based on skill name
+      const title = skillNameToTitle(SKILL_NAME)
+      metadata = {
+        version: '1.0',
+        organization: '',
+        date: new Date().toLocaleDateString('en-US', {
+          month: 'long',
+          year: 'numeric',
+        }),
+        abstract: `${title} guidelines for identifying, preventing, and mitigating issues, ordered by impact.`,
+      }
+    }
+
+    // Generate markdown
+    const markdown = generateMarkdown(sections, metadata, SKILL_NAME)
+
+    // Write output
+    await writeFile(OUTPUT_FILE, markdown, 'utf-8')
+
+    console.log(
+      `✓ ${SKILL_NAME}: Built AGENTS.md with ${sections.length} sections and ${ruleData.length} rules`
+    )
+  } catch (error) {
+    console.error('Build failed:', error)
+    process.exit(1)
+  }
+}
+
+build()

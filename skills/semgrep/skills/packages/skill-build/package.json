@@ -1,0 +1,38 @@
+{
+  "name": "skill-build",
+  "version": "0.1.0",
+  "description": "Generic build tooling for agent skills with rules",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm build-agents && pnpm extract-tests",
+    "build-agents": "tsx src/build.ts",
+    "validate": "tsx src/validate.ts",
+    "extract-tests": "tsx src/extract-tests.ts",
+    "migrate": "tsx src/migrate.ts",
+    "dev": "pnpm build && pnpm validate"
+  },
+  "keywords": [
+    "security",
+    "guidelines",
+    "llm",
+    "agents",
+    "skills"
+  ],
+  "license": "MIT",
+  "engines": {
+    "pnpm": ">=10.21.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^25.0.10",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.1",
+    "remark-frontmatter": "^5.0.0",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.1.0"
+  }
+}
