@@ -1,3 +1,0 @@
-compatibility_checker.py
-migration_planner.py
-rollback_generator.py
