@@ -1,0 +1,86 @@
+theres the nist and tier 1 through 3 folders with files.
+
+Analysis of Tier 1-3 and the OWASP meta files
+Coverage
+
+All 15 Tier 1, 6 Tier 2 and 20 Tier 3 files are present, along with AGENTS.md, CLAUDE.md, GUIDELINE.md and five reviewer agents. Access_Control_Cheat_Sheet.md is only a deprecation stub pointing to Authorization.
+
+Not in this send:
+
+OWASP LICENSE.md. AGENTS.md and GUIDELINE.md say nothing about license, so OWASP stays idea-only until it arrives.
+NIST 63C-4. No PDFs came through in this message.
+.claude/commands/review-cheatsheet-pr.md. The agents reference it, but it isn’t needed.
+Architectural reasoning
+
+The tiers plug into the spine at different points:
+
+Tier 1 feeds the auth item in the stack decision record and the per-FN authorization line (role, ownership predicate, tenant, denial status).
+Tier 2 supplies the matrix and regression tests that make that line checkable by wings-lint.
+Tier 3 supplies per-FN build rules and the review lenses.
+The reviewer agents supply the review contract shape.
+
+The OWASP series is hub-and-spoke by design. AGENTS.md and the duplication checker forbid restating another sheet, so the rules are scattered across files. Wings has to flatten them into one rule per home, which matches the single-owner discipline already in the spine.
+
+Maintenance quality is uneven. Recently rewritten sheets carry pinned, verified citations (Session, Passkey, Multi_Tenant, JWT, Webhook, Password_Storage, Business_Logic). Legacy sheets are 2010-era (Error_Handling, Injection_Prevention, Query_Parameterization, Unvalidated_Redirects, Mass_Assignment, Denial_of_Service). Their snippets can’t be copied.
+
+Earlier open claims, now settled
+Passwords. Authentication matches NIST 63B-4: at least 8 characters with MFA, at least 15 without, a maximum of at least 64, no composition rules, no periodic rotation, and a breached-password blocklist. Password_Storage confirms Argon2id as the default (m=19456, t=2, p=1 minimum). bcrypt is legacy-only, with a work factor of at least 10 (Addy’s 12 is stricter) and a 72-byte cap. My “no-truncation conflicts with bcrypt” worry is real only for multibyte input, since 72 bytes is at least 64 ASCII characters. The Argon2id default stands.
+Pooled-connection tenant leak. Multi_Tenant confirms it. FORCE ROW LEVEL SECURITY does not bind superuser or BYPASSRLS roles. Tenant context must be transaction-local (SET LOCAL or set_config(..., true)), and Supabase’s plain set is wrong.
+OAuth account linking. Authentication says to key on iss+sub and never auto-link on matching email. It does not mention email_verified, so wings adds that.
+Object IDs. IDOR confirms that authorization, not ID type, stops enumeration.
+Source verdicts
+Source	Take	Drop or fix
+Session_Management	Server-side session store, token hashing with a verifier split, __Host- cookies, explicit SameSite, regenerate on privilege change, logout revokes all IDs, no tokens in localStorage	Says 64-bit entropy minimum and also 128 bits for custom IDs. Wings uses 128. Timeout ranges are unsourced.
+Authentication, Credential_Stuffing	MFA first, generic errors with uniform timing, breached-password check, no security questions	Authentication’s “max 2-3 lockouts, then permanent lockout” is a DoS vector and contradicts Denial_of_Service. Credential_Stuffing’s “require unpredictable usernames” contradicts Authentication, and its fingerprinting libraries are dated.
+Forgot_Password, MFA, Passkey	Single-use hashed tokens, TOTP seed encrypted with replay rejection, UV verified server-side, recovery as the weakest link	Forgot_Password allows security questions alongside other methods. Authentication, MFA and Credential_Stuffing all say no, citing ASVS 6.4.2. Wings says never.
+JWT, OAuth2	Pin algorithms, require iss/aud/exp, typ for token-type confusion, key anchoring, Auth Code + PKCE only, rotation	JWT is for service tokens and OIDC. First-party web uses sessions, and the sheet itself discourages JWT sessions.
+CSRF	Framework built-in first, then Fetch Metadata plus Origin fallback, signed double-submit	Naive double-submit is discouraged. CSRF only applies with ambient credentials.
+Authorization, IDOR, Mass_Assignment	Deny by default, scoped lookup, DTO allowlist	Authorization cites 2021 data. The Mongoose snippet is invalid JS, and the other framework snippets are dead-link era. Take the DTO principle only.
+Multi_Tenant	Verified membership, transaction-local context, schema-derived RLS inventory, exact tenant-prefix storage deletion	Undefined names (SecurityException, JSONResponse) and offset pagination in the examples
+Authorization_Regression_Testing	Best wings-lint source: YAML matrix, multi-user replay, role demotion, cross-tenant test, CI gate	Fixture hardcodes expected_denial_code: 403 while its own pattern allows 404. Mixes role and tenant in denied_roles. The CI-401/403-volume monitor is noise.
+Authorization_Testing_Automation	Matrix as source of truth, one test per point of view, failure message names service, role and expectation	XML/JAXB/XSL stack is stale. The test substitutes {messageId}=1 for every role, so it cannot test ownership. It only knows 200/403 and ignores the Data dimension it names. Status-only assertions miss data leakage.
+Authorization_Patterns, Policy_And_Data_Distribution, Decisions_And_Output_Handling	Fail closed when no decision. Apply the same predicate to list, count, export and search. Intersect predicates with AND.	Policy distribution is PDP/OPA infrastructure. It becomes an optional stack pack, not core.
+Business_Logic_Security	Top requirements source: written invariants, atomic check-then-act, state machines, abuse controls, concurrency tests	Merge its idempotency section with Addy’s, which is stronger.
+Input_Validation, SQL_Injection_Prevention	Allowlist rules, size limits before parsing, JSON Schema required and additionalProperties, parameterize values and allowlist identifiers	Strong, take mostly as is. Query_Parameterization has Rails 3 APIs, a PHP example that never executes, and ? placeholders for SQLx (Postgres uses $n). Injection_Prevention is a hub table plus dated filler.
+XSS, CSP	Context encoding, DOMPurify, safe sinks, Trusted Types, strict nonce CSP	XSS refers to rules #1/#4/#5 that don’t exist. CSP generates nonces with uuid.v4(), which Cryptographic_Storage says not to rely on. Drop the interceptor essays.
+HTTP_Headers	nosniff, frame-ancestors, Referrer-Policy, the nginx add_header inheritance gotcha	Its recommended HSTS string includes preload. COOP, COEP and CORP defaults break OAuth popups and CDN assets. Wings makes these opt-in.
+REST_Security	Method allowlist, content-type checks, out-of-order execution	Opens with HATEOAS, and the status table lacks 409/422. The Permissions-Policy list contains names I’d verify against current browsers.
+GraphQL	Per-field and per-edge authorization, the node(id) bypass, depth/cost/batch limits	Recommends alphanumeric-only input, against Input_Validation’s Unicode guidance. Says disable introspection everywhere, then allows it for external APIs. The introduction links the deprecated Access_Control stub.
+Webhook_Security	Raw-body HMAC, constant-time compare, 5-minute tolerance, dedupe cache of at least 2x that, connect-time IP check, CSRF exemption only with signature	Strong. Stripe-specific figures need re-verification before citing.
+SSRF	Connect-time IP validation, redirects off, IPv4-mapped and NAT64 normalization, URL parser disagreement	The monitoring script is invalid Python (a string literal spans two lines, an or is outside parentheses, and .query is deprecated). The deny-list omits 100.64.0.0/10. Wings uses “allow only globally reachable addresses”.
+Unvalidated_Redirects	ID-to-URL mapping, parsed-URL allowlist, reject userinfo	Examples are 2010-era. No returnUrl/OAuth redirect_uri coverage.
+File_Upload	Allowlist, generated filenames, outside the webroot, re-encode images, NTFS ADS and 8.3 names	No SVG mention, and no presigned-URL or separate-origin pattern, which is the modern default.
+Error_Handling	Generic 5xx, server-side logging	Framework examples are dated. Body cites RFC 7807 while its reference list cites 9457, which obsoletes it.
+Logging	Event list, exclusions, log injection	Over-long and SIEM-oriented, with a slop paragraph under Authentication.
+Secrets_Management, Cryptographic_Storage	Lifecycle, incident order, AES-GCM, CSPRNG table, DEK/KEK	Secrets discourages env vars, which PaaS stacks use. Drop Kubernetes sidecars, HSM and memory zeroing.
+Denial_of_Service, Email_Validation	ReDoS, request-size limits, feature-level rate limits. Email: store original plus canonical form, verify before activation, email change flow	Denial_of_Service has [Future additions...] placeholders and layer-1 anecdotes.
+Meta: AGENTS.md, GUIDELINE.md, 5 reviewers	Fixed-format reviewer output (verdict, severity, evidence, fix), claim-vs-source lens, “good over best”, one topic per home	The maintainers’ own rules say these sheets are AI-assisted and re-audited. Treat every line as unverified until checked.
+Conflicts and house rules
+Conflict	Rule
+403 vs 404	401 unauthenticated. 403 for function-level role denial. 404 for another owner’s object. The matrix models an allowed set of denial codes.
+Token storage at rest	At least 128-bit random tokens use SHA-256. Passwords use Argon2id.
+Lockout	Throttle per account and per IP with escalating delay and no permanent lockout. Recovery stays available.
+Security questions	Never.
+RBAC vs ABAC/ReBAC	Role plus a mandatory ownership/tenant predicate. A policy engine only past stated triggers.
+Nonces and tokens	CSPRNG, at least 128 bits. Never uuid.v4() or Math.random.
+Env vars	Acceptable on managed platforms via the platform secret store. Never in images, ARG/ENV or client bundles. The client-bundle rule is new and has no upstream source.
+Unicode input	Input_Validation wins over GraphQL’s alphanumeric advice.
+Error format	Details below.
+wings-lint additions
+Every FN has an authorization line, plus a CSRF note when it uses cookie auth.
+Generate the YAML matrix from FN lines. Every ownership-scoped FN needs cross-user and cross-tenant cells, and expectations include a body assertion, not status alone.
+List, count and export FNs share one predicate.
+Every tenant-scoped TB appears in a schema-derived RLS inventory, and a test asserts the request role is neither superuser nor BYPASSRLS.
+Webhook FNs declare signature, timestamp tolerance and dedupe.
+Pattern scans for jwt.verify without pinned algorithm/iss/aud, uuid/Math.random used for tokens, redirect(req.query…), and fail-open secret defaults.
+Working assumptions
+OWASP is idea-only until LICENSE.md arrives. NIST text can be reused with attribution.
+Error envelope: Addy’s {error:{code,message,details}} plus requestId stays as the logical shape, serialized as RFC 9457 application/problem+json (type, title, status, detail, with code and requestId as extension members). This is a refinement of the earlier confirmation, so tell me if you’d rather keep the bare Addy envelope.
+Email local-part comparison and the policy-engine triggers go into the stack decision record, not core.
+Nothing is saved to memory.
+Next send
+LICENSE.md and 63C-4.
+Tier 4: Secure_Code_Review, Threat_Modeling, Abuse_Case, Secure_Coding_with_AI, Secure_Product_Design, AI_Agent_Security, MCP_Security and LLM_Prompt_Injection_Prevention.
+Three sheets that the files above link to: Key_Management, NoSQL_Security and DOM_based_XSS_Prevention.
+
+Tier 5 can follow after that.
