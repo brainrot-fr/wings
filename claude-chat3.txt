@@ -127,3 +127,87 @@ Conflict table above. Accept all, or tell me which rows to change.
 Stack packs. Drizzle/Postgres and Supabase become optional stack-conditional references, not core. Confirm.
 
 Batch 4 (frontend) is next. If you can, add the Supabase security-* and schema-* rule files from the clone, and run the LICENSE check on the repos listed above.
+
+batch 2 ├── addyosmani │   └── agent-skills │   ├── references │   │   └── observability-checklist.md │   └── skills │   ├── api-and-interface-design │   │   └── SKILL.md │   ├── deprecation-and-migration │   │   └── SKILL.md │   └── observability-
+
+PASTED
+
+this is the tree of the current folders, what all do you want me to remove and/or add, please specify.
+
+The tree shows two problems: Trail of Bits is the full repo rather than the eight plugins I asked for, and there are no LICENSE files except Trail of Bits’. Fixing those, plus a few small cuts and gaps, is all that’s needed.
+
+Remove
+
+Trail of Bits. It is reference-only under CC BY-SA, so every extra plugin is noise. Keep only these 7 plugins, under plugins/:
+
+differential-review
+fp-check
+sharp-edges
+insecure-defaults
+variant-analysis
+audit-context-building
+supply-chain-risk-auditor
+
+Delete the other ~45 plugins (building-secure-contracts, c-review, rust-review, zeroize-audit, trailmark, patching-bugs, regression-hunt, yara-authoring, the testing-handbook skills, and so on). They are off-topic for web and full-stack apps.
+
+Inside the 7 kept plugins, also delete:
+
+.claude-plugin/, evals/, tests/, workflows/*.js, hooks/, scripts/ (runtime and harness, not skill content)
+insecure-defaults/references/*.json (the .md twins carry the content)
+agentic-actions-auditor (niche, skipped in my analysis)
+
+Supabase. Remove CHANGELOG.md (both), assets/feedback-issue-template.md and references/skill-feedback.md. They are Supabase product plumbing. Keep _sections.md and _template.md, since they show the atomic rule format we are adopting.
+
+alirezarezvani. Remove migration-architect entirely. I already judged it unrunnable pseudo-code, and oma plus Addy cover the mechanics. Everything else in the tree can stay.
+
+Cloudflare. MEMORY-SAFETY-AND-BINARY.md can go, since wings targets web and full-stack apps. The two validate-*.cjs files can stay as read-only reference for the verdict contract, but nothing from them gets ported.
+
+Add
+
+1. LICENSE files. Only Trail of Bits has one in the tree. Please add the LICENSE, plus any NOTICE file, from each of these:
+
+addyosmani/agent-skills
+alirezarezvani/claude-skills
+anthropics/knowledge-work-plugins (and any per-skill LICENSE.txt)
+ccheney/robust-skills
+first-fluke/fullstack-starter
+supabase/agent-skills
+cloudflare/security-audit-skill
+semgrep/skills (check this one closely, because Semgrep sometimes ships rule content under a separate rules license)
+
+2. Supabase rule contents. The tree now lists all the schema-*, security-*, query-*, lock-* and conn-* rules, which is good. I still need the file contents, in particular:
+
+security-rls-basics.md, security-rls-performance.md, security-privileges.md
+schema-constraints.md, schema-data-types.md, schema-primary-keys.md, schema-foreign-key-indexes.md, schema-partitioning.md
+_sections.md and _template.md
+
+The advanced-*, data-*, monitor-* and conn-* rules can wait unless you want them in the first pass.
+
+3. Missing Trail of Bits SKILL files. insecure-defaults has no skills/ folder in the tree (only commands/audit.md, references/ and workflows/audit.js). I need skills/insecure-defaults/SKILL.md if it exists in the clone. Several kept plugins also show skills/<name> collapsed, so please confirm each SKILL.md and its references/ come along.
+
+4. Optional additions for gaps in the sources.
+
+wshobson/agents: api-design-principles, architecture-patterns and auth-implementation-patterns from the backend-development plugin, and postgresql-table-design from the database plugin. Auth has no strong source in the current set, so this is the highest-value add. Paths may differ in the clone, so send whatever matches.
+addyosmani/agent-skills: skills/code-simplification/SKILL.md, which completes his review chain and is still unread from Batch 1.
+Trail of Bits: entry-point-analyzer (attack-surface enumeration, which maps to surface closure) and spec-to-code-compliance (requirement-to-code traceability, close to our AC-to-check lint). Both are idea-only under the license.
+Trail of Bits: mutation-testing and property-based-testing, as input to the test value-bar rule.
+
+After this I can write the Batch 2 and 3 design with source-level detail instead of tree-level inference. I would still like your answers to the three decisions from my last message (security block shape, the conflict table, stack packs), but they don’t block the file cleanup.
+
+batch 3 ├── addyosmani │   └── agent-skills │   ├── agents │   │   └── security-auditor.md │   ├── references │   │   └── security-checklist.md │   └── skills │   └── security-and-hardening │   ├── references │   │   └── hardening-patterns.md │  
+
+PASTED
+
+batch 2 ├── addyosmani │   └── agent-skills │   ├── LICENSE │   ├── references │   │   └── observability-checklist.md │   └── skills │   ├── api-and-interface-design │   │   └── SKILL.md │   ├── code-simplification │   │   └── SKILL.md │   ├──
+
+PASTED
+
+this works? yes or no
+
+Yes, it works. The cleanup is right, and I can start the Batch 2 and 3 design from this. Three gaps remain, and none of them blocks me:
+
+LICENSE files. Only Addy, wshobson and Trail of Bits have one. Still missing: alirezarezvani, knowledge-work-plugins, ccheney, first-fluke, supabase, cloudflare and semgrep. I won’t copy any text from those until they’re in. Ideas-only rewriting is unaffected.
+insecure-defaults has no skills/ folder or SKILL.md. I’ll build from its commands/audit.md and references/*.md, which carry the content. If a SKILL.md exists upstream, send it.
+Supabase rule contents. The file names are listed, but I need the actual text of security-rls-basics, security-rls-performance, security-privileges, the schema-* rules, _sections.md and _template.md.
+
+I’m still waiting on your answers to the three decisions from my last analysis (security block shape, the conflict table, stack packs).
