@@ -42,3 +42,90 @@ Carried forward, no objection needed
 All other conflict-table rows are unchanged. Drizzle/Postgres and Supabase stay as optional stack packs, not core. For the security block, I’m assuming build-time rules plus a review lens pass using Cloudflare’s verdict model, with no sandbox or Node machinery. Tell me in the Batch 3 conversation if you want that changed.
 
 Send Batch 3 next.
+
+PDF
+PDF
+PDF
+PDF
+NIST Special Publication 800-63B-4.pdf
+PDF
+PDF
+PDF
+
+skills/OWASP/CheatSheetSeries/ ├── AGENTS.md ├── book.json ├── cheatsheets │   ├── Abuse_Case_Cheat_Sheet.md │   ├── Access_Control_Cheat_Sheet.md │   ├── AI_Agent_Security_Cheat_Sheet.md │   ├── AI-Powered_Advertising_Systems_Security_Cheat_Sheet.md │   ├── AML_Sanctions_AI_Agent_Payments_Cheat_She
+
+PASTED
+
+you actually mentioned a great resource the attached is the tree for owasp let me know what all files interest you so i send them over. and here are the pdfs for NIST publications.
+
+I’ll read the file-reading skill first, since 63B-4 is the one that settles my password-policy claim from last time.
+
+NIST: what I read and what it changes
+
+The 63A and 63C PDFs in context are the 2017 versions, and both carry NIST’s withdrawal notice (withdrawn Aug 1, 2025, superseded by the -4 editions). I’m treating them as history only, and I’m not opening the old 63b or 63-3 for the same reason. The one that matters for wings is 63B-4, and it confirms last turn’s password claims:
+
+Length: a password used as a single factor needs at least 15 characters. One used only inside MFA needs at least 8. wshobson’s 12 matches neither.
+Maximum length: verifiers should allow at least 64 characters.
+Composition and rotation: composition rules are banned, and so is periodic rotation. A forced change is allowed only on evidence of compromise.
+Blocklist: passwords are checked against a blocklist of breached, common and context-specific words, such as the service name or username. The whole password is compared, and the reason for rejection must be shown.
+Storage inputs: no truncation, NFC normalization before hashing, no stored hints, and no security questions or KBA.
+Usability and throttling: password managers and paste are allowed, and rate limiting is mandatory (§3.2.2).
+
+My earlier “12-character minimum” criticism was the wrong target. The composition rules are the real violation, and 12 also falls short of NIST’s 15.
+
+One inference I haven’t verified: no-truncation conflicts with bcrypt’s 72-byte cap, so the auth rule should default to Argon2id. I’ll check that against OWASP Password_Storage before writing it down.
+
+Gaps:
+
+63C-4 (federation) was not uploaded. It’s the one that matters for OAuth/OIDC login. The old 63C shows the shape of the checks (issuer, signature, expiry, audience, single-use references), but I won’t cite it normatively. Please send 63C-4.
+63A-4 (identity proofing) and 63-4 (the AAL/FAL selection framework): low value for a general SDLC suite. Skip 63A-4, and I’ll skim 63-4 only if you want assurance levels in the stack decision record.
+OWASP: files I want
+
+I’m picking by which wings block they feed. Auth and authz are first because every FN authorization line depends on them.
+
+Tier 1: auth, authz, sessions (send first)
+
+Authentication, Password_Storage, Session_Management
+Authorization, Access_Control, Insecure_Direct_Object_Reference_Prevention, Mass_Assignment
+Cross-Site_Request_Forgery_Prevention, Forgot_Password, Multifactor_Authentication
+OAuth2, JSON_Web_Token, Credential_Stuffing_Prevention
+Multi_Tenant_Security (feeds the tenant predicate in the per-FN authorization line)
+Passkey_Security
+
+Tier 2: the new authz files (send with Tier 1)
+
+Authorization_Patterns, Authentication_Patterns
+Authorization_Regression_Testing, Authorization_Testing_Automation
+Authorization_Decisions_And_Output_Handling, Authorization_Policy_And_Data_Distribution
+
+I can’t judge these six from their names. The regression and automation ones map directly onto what wings-lint should check, so I want them. I’ll audit them as hard as I audited wshobson.
+
+Tier 3: build-time security rules
+
+Input_Validation, Injection_Prevention, Query_Parameterization, SQL_Injection_Prevention
+Cross_Site_Scripting_Prevention, Content_Security_Policy, HTTP_Headers
+REST_Security, GraphQL, Webhook_Security, Server_Side_Request_Forgery_Prevention, Unvalidated_Redirects_and_Forwards
+File_Upload, Error_Handling, Logging, Secrets_Management, Cryptographic_Storage
+Business_Logic_Security, Denial_of_Service, Email_Validation_and_Verification
+
+Tier 4: review and process
+
+Secure_Code_Review, Threat_Modeling, Abuse_Case, Secure_Coding_with_AI, Secure_Product_Design
+AI_Agent_Security, MCP_Security, LLM_Prompt_Injection_Prevention. These matter because the agent running wings is itself an attack surface.
+
+Tier 5: optional stack packs
+
+Nextjs_Security, JavaScript_and_TypeScript_Security, Nodejs_Security, FastAPI_Security, Django_Security
+CI_CD_Security, GitHub_Actions_Security, Software_Supply_Chain_Security, NPM_Security, Docker_Security
+Database_Security
+cheatsheets_draft/Backend_as_a_Service_Security is relevant to the Supabase pack, but it’s a draft, so I’d treat it as low trust.
+
+Repo meta files: AGENTS.md, CLAUDE.md, .claude/agents/* and GUIDELINE.md. I want these for how OWASP structures a sheet and reviews it for agents, not for security content.
+
+Skip: the mobile, automotive, drone, AML, advertising, C toolchain, Java, .NET, PHP, Laravel, Symfony, Rails, SAML, XML and XPath/LDAP sheets, and the infrastructure-heavy ones (Kubernetes, network segmentation, zero trust, TLS). None fit this suite.
+
+Flag: license
+
+You said all the upstream files are MIT or Apache, but I recall the OWASP CheatSheetSeries as CC BY-SA 4.0, which is ShareAlike. If wings ships under MIT, reusing OWASP text verbatim would conflict. I haven’t seen the repo’s LICENSE.md, so please include it in the next send. Until it’s confirmed, I’ll treat OWASP as idea-only, the way I’m treating Trail of Bits. NIST text is fine to reuse, since the PDFs say it isn’t copyrighted in the US and ask only for attribution.
+
+Send Tier 1 and Tier 2 together with 63C-4 and the OWASP LICENSE.md. Tiers 3 to 5 can go in the following batches.
