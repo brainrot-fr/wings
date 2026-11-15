@@ -1,0 +1,44 @@
+theres the remaining batch 2 lets move forward, remember dont save anything to memory from now in this project. and regarding the license filees, dont worry all of them are MIT or apache. Batch 3 next conversation.
+
+Nothing gets saved from here. Licenses accepted: MIT/Apache notices still get carried where text is reused, and Trail of Bits stays idea-only.
+
+Where this batch plugs in
+
+Auth has no strong source in the corpus, and every FN authorization line and TB access matrix depends on it. So the auth file matters most, and it is also the weakest material here. The Postgres file is the opposite: strong, and mostly a merge job with sources I already have.
+
+The Supabase rule files you sent last time are also in, so I’ve folded them in below.
+
+Verdicts
+Source	Take	Drop or fix
+wshobson postgresql-table-design	Best pure-Postgres design source. Rules, gotchas and a “types to avoid” table. The SKILL/details split names what each part holds.	“Most selective columns first” contradicts oma-db’s equality-then-range rule. The example orders FK has no ON DELETE, though its own rule requires one. Its RLS section is thin, so use Supabase’s.
+wshobson api-design-principles	GraphQL material only: payload errors, DataLoader, depth and complexity limits, union errors. REST is already covered better by Addy.	Pydantic v2 treats _links as a private attribute, so the HATEOAS example won’t serialize. The @include(if: $isOwner) example reads like authorization, but it is client-controlled. The REST rate limiter is an in-memory dict, which breaks the stateless rule. The template ships allow_origins=["*"] with a TODO, a fail-open default. Error envelopes carry timestamp and path, which my house rule excludes.
+wshobson architecture-patterns	The dependency rule in one sentence, the troubleshooting symptoms (framework decorators in entities, use case importing an adapter), and in-memory adapters for tests.	place_order charges the card before saving the order, with no compensation and no idempotency. create_user checks for the email, then saves, which is the check-then-act race Addy flags. pydeps only draws a graph, so enforce the rule with import-linter or tsarch so CI fails.
+wshobson auth-implementation-patterns	The authentication vs authorization split and the strategy comparison.	See below.
+Addy code-simplification	Chesterton’s Fence, scope to what changed, separate refactor from feature, tests unmodified as the red flag. It fits as a step after Build and before Review.	Its first TS example removes async and says behavior is unchanged. A sync throw then escapes instead of becoming a rejection, so the example breaks its own principle 1.
+Supabase rules	The atomic format: title, impact, incorrect/correct, reference. The RLS rules, the security definer rule with a private schema and revoke execute, and the FK-index rule.	_contributing.md mandates quantified impact, so rules carry numbers like “100-1000x faster” with no source. Use qualitative impact tiers instead. security-rls-basics uses a plain set app.current_user_id, which leaks across pooled connections. ccheney’s set_config(..., true) inside a transaction is correct. schema-constraints checks pg_constraint by name only in two of its three examples, so it can match another table’s constraint. conn-limits says 5 MB per connection while conn-pooling says 1-3 MB.
+Auth: take the concepts, rewrite the rest
+
+Defects in the wshobson examples:
+
+No rotation: the refresh flow never rotates the refresh token and has no reuse detection. It looks tokens up by hash(token), which only works if hash is deterministic. With bcrypt it fails, and the file never says which.
+JWT pinning: jwt.verify doesn’t pin algorithms, issuer or audience.
+Session fixation: login sets req.session.userId with no regenerate.
+Enumeration: login short-circuits when the user isn’t found, which leaks via timing. Register returns “Email already registered”.
+OAuth linking: the Google callback has no state. It also creates a user from the profile email with no email_verified check and no linking policy, which is the account-takeover setup.
+Mass assignment: requireOwnership is followed by db.posts.update(req.params.id, req.body), so a client can overwrite userId.
+CSRF: it recommends httpOnly cookies, then accepts cookie tokens with no CSRF discussion.
+Password policy: 12-character minimum plus composition rules. As far as I know, NIST 800-63B advises against composition rules and for breached-password checks. bcrypt’s 72-byte limit is never handled.
+Gaps: its “when to use” lists SSO and multi-tenancy, but the file covers neither. Password reset, email verification, MFA and passkeys are missing too.
+
+Plan: write auth new, as a stack decision record item plus a per-FN authorization line (role, ownership predicate, tenant) that wings-lint checks. Pull the traps from Supabase (the user_metadata trap, TO authenticated without an ownership predicate being BOLA) and alirezarezvani’s backend_security_practices (session regeneration, refresh family). I haven’t fetched the OWASP cheat sheets or NIST 800-63B, and I’d verify against them before writing anything normative.
+
+Conflict table changes
+PK type (revised): default bigint generated always as identity. UUIDv7 only for IDs that are exposed or distributed. wshobson and Supabase agree on this. It replaces my earlier “UUIDv7 on PG18+” default. ID type doesn’t fix enumeration anyway, authorization does.
+Composite index order: equality columns first, then range or sort. oma and wshobson’s own example agree. Reject “most selective first” wherever it appears.
+Error envelope: confirmed as Addy’s {error:{code,message,details}} plus requestId, with no timestamp or path.
+Pagination: cursor by default, confirmed.
+Carried forward, no objection needed
+
+All other conflict-table rows are unchanged. Drizzle/Postgres and Supabase stay as optional stack packs, not core. For the security block, I’m assuming build-time rules plus a review lens pass using Cloudflare’s verdict model, with no sandbox or Node machinery. Tell me in the Batch 3 conversation if you want that changed.
+
+Send Batch 3 next.

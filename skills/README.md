@@ -24,3 +24,4 @@ These are curated skill files from the upstream repositories, stored as regular 
 - [obra/superpowers](./obra/superpowers/) — [upstream](https://github.com/obra/superpowers)
 - [wshobson/agents](./wshobson/agents/) — [upstream](https://github.com/wshobson/agents)
 - [openai/skills](./openai/skills/) — [upstream](https://github.com/openai/skills)
+- [OWASP/CheatSheetSeries](./OWASP/CheatSheetSeries/) — [upstream](https://github.com/OWASP/CheatSheetSeries)
