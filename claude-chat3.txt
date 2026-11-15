@@ -1,0 +1,129 @@
+lets continue, its time for batch 2 and batch 3.
+
+Analysis of Batch 2 (database and backend) and Batch 3 (security)
+Architectural reasoning
+
+The two batches plug into the spine at different points:
+
+Backend and database supply the shapes behind the FN- (function) and TB- (table) IDs. Neither block has a source that ties its output to requirement IDs. The closest are code-to-prd’s page shape (frontend only), oma-pm’s acceptance_criteria with required_checks, and the spec-driven-workflow API/data-model sections.
+Security is two different jobs, and the sources split cleanly between them:
+Build-time: controls attached to FN and TB, which Addy, Supabase and Semgrep cover.
+Review-time: a hunt with an evidence standard, which Cloudflare covers.
+
+Wings needs both modes. The review mode must reuse the same IDs, so findings point at FN/TB/PG items instead of file paths alone.
+
+Coverage
+Batch 2: sufficient. The gaps are _shared/runtime/result-contract.md (not needed, it is oma-runtime specific) and most Supabase rule files (only 2 of the query-*/schema-*/security-* rules arrived). I’d like the Supabase security-* and schema-* rules.
+Batch 3:
+Cloudflare is complete.
+Semgrep has the 4 sample rules, the LLM skill, and the semgrep skill with its references.
+Trail of Bits has no insecure-defaults/SKILL.md and only some references, which is fine because it is reference-only.
+Addy’s security-and-hardening, hardening-patterns, security-checklist and security-auditor files are all present.
+Licenses: Trail of Bits is CC BY-SA 4.0, confirmed from the LICENSE file, so ideas only and no text. Please verify the Cloudflare, Semgrep, Supabase, ccheney, alirezarezvani and Addy LICENSE files before any copying.
+Batch 2: source tiering
+Source	Verdict
+first-fluke oma-* + _shared/core	Best governance prose. Mine ideas only, because it depends on the oma CLI, Serena MCP and .agents/ runtime.
+ccheney postgres-drizzle	Strongest stack-specific source. It is version-aware (Drizzle 0.x vs 1.0) and its caveats are verified. It becomes an optional stack pack, not core.
+ccheney clean-ddd-hexagonal	The SKILL is good (not a mandatory layout). The references are long generic DDD. Take the SKILL’s trigger logic, outbox and idempotent consumer.
+Supabase	Best security checklist for RLS and views. It is Supabase-conditional. The rule-file format is reusable.
+Addy (observability, api-and-interface, deprecation)	Highest quality in the batch.
+alirezarezvani	Mixed. code-to-prd and spec-driven-workflow are valuable. The rest is generic or has defects (below).
+knowledge-work-plugins	Shallow templates. Take the ADR template, postmortem and rollback triggers only.
+What to take from oma
+Executable acceptance contract. Each task has acceptance_criteria with IDs and required_checks (argv + cwd) that cover every criterion. Wings’ “AC to check” lint should copy this binding.
+TDD_EVIDENCE (RED then GREEN, recorded). It goes with the “value bar” test rule.
+Per-task scope directory prefixes, to detect boundary violations.
+Anti-patterns §5. Business policy, workflow and external effects live in the application. Keep constraints, RLS, atomic updates and audit in the database.
+migration-playbook (expand-contract, lock timeouts, batched backfill) and query-tuning (measure, explain, nominate, test).
+execution-policy. Ask only when it changes the outcome, and never treat silence as approval.
+Drop: the ISO 21500/31000/38500/42001/27001 wrappers (they admit they are optional ceremony), the Serena guard, vendor dispatch, and the oma stats/session-metrics machinery.
+What to take from Addy
+Observability. On-call questions first, RED/USE metrics, the cardinality rule, symptom-based alerts, runbooks, and the entry-point field on shared log sinks.
+Idempotency section.
+Derive the key from intent, not from the attempt.
+Claim it atomically with a unique constraint.
+Hash the payload.
+Decide the in-flight duplicate response deliberately.
+Treat timeouts as an “unknown” outcome.
+Set retention from the longest retry chain.
+Contract-first, validate at boundaries, and Hyrum’s law.
+Expand/contract rules.
+Defects found in the alirezarezvani material
+Likely fabricated citations in senior-backend/forcing_questions.md. Examples are “Andrew Clay Shafer, The SLO Handbook (2019)”, “Aaron Patterson + Rails security advisories”, and “Reinertsen Principle Q5”. Given your preference for verified sources, drop the citations and keep only the questions.
+Composition map points at skills that don’t exist in the clone, and the scripts (backend_decision_engine.py and others) weren’t sent.
+Index advice in database-designer (“most selective column first”) contradicts oma’s “equality predicates first, then range or sort”. oma is correct.
+SSRF blocklist by hostname regex in backend_security_practices.md is bypassable (decimal and IPv6 forms, DNS rebinding). Addy’s resolve-all-addresses approach is better.
+resolved.startsWith(baseDir) path check accepts sibling prefixes such as /base-evil. Addy’s relative() check is correct.
+database-schema-designer:
+The seed script has a syntax error.
+The polymorphic attachment table is flagged as an anti-pattern by oma-db.
+Its audit table is mutable.
+migration-architect and the reconciliation reference: these are roughly 80 KB of illustrative pseudo-code that cannot be run. It includes from sklearn.isolation import ..., which does not exist. Drop it and use oma and Addy for the mechanics.
+Numeric invented thresholds, such as ambiguity scoring in percent. The stop-and-ask categories are good, but the percentages are arbitrary.
+Conflicts and proposed house rules
+Conflict	House rule
+Password hashing: bcrypt ≥12 (Addy, senior-backend) vs Argon2id (oma)	Argon2id by default, bcrypt accepted as legacy
+Validation status: 400 (acceptance patterns, senior-backend) vs 422 (Addy)	400 for malformed, 422 for failed validation
+Error envelope: three variants	Addy’s {error:{code,message,details}} plus requestId, no timestamp
+Pagination: offset/page/cursor in three shapes	Cursor/keyset by default, offset only for small bounded lists, one envelope
+Soft delete: “best practice” (schema-designer) vs “anti-pattern everywhere” (sql-assistant)	Only where retention or restore is a stated requirement, with a partial index
+Money type: FLOAT, DECIMAL(19,4), or integer cents	Never float; NUMERIC or integer minor units
+PK type: UUIDv4, UUIDv7, cuid, identity	A decision-record item, default UUIDv7 on PG18+, otherwise identity bigint
+Layering: router→service→repo (oma) vs DDD hexagonal (ccheney)	Layered by default; DDD only when its trigger criteria apply
+Coverage: 80% mandate, “auth 100%” (tdd-guide, senior-qa)	Already decided: value bar
+JWT/session: HS256, RS256, sessions	Stack decision record chooses; access ≤15 min, revocation story required
+oma backend.md rule 11 (fallback when API key is absent) vs Trail of Bits’ fail-open rule (“env.get(X, Y) runs, env[X] crashes”)	Never fall back for signing, session or encryption secrets. They fail at startup. A third-party key may use a labeled simulated mode, never silently in production.
+Severity: critical to info (Cloudflare), CRITICAL to LOW (oma), HIGH/MEDIUM/LOW (Semgrep)	P0 to P3, with confidence as a separate field
+Unknown tags: [TBC], NEEDS CLARIFICATION, Assumption:	Already decided; map all three
+Batch 3: security design
+Cloudflare security-audit
+
+It is the strongest source and also the heaviest.
+
+Keep:
+
+Three verdicts: confirmed, needs_validation and rejected. Only confirmed findings get severity.
+Candidate gate. Every finding names the lower-trust principal, the crossed boundary, the affected resource and a concrete result. A missing best practice or a guessed deployment fact is not a finding.
+Source-visibility rule. A control outside the repository is never assumed present or absent. It becomes needs_validation with the exact owner-observable fact.
+Severity anchors and the high/medium discriminator. Does the result fully defeat a control, or only weaken it?
+Stable root-cause fingerprint across states, and independent re-verification of every confirmed finding by a fresh context (labeled degraded fallback).
+Companion attack-class files. The classes are web/auth, client-side, data isolation and lifecycle, cloud, supply chain, AI/LLM, protocols and messaging, resource exhaustion, and desktop and local IPC. Rewrite them as wings review lenses. They already follow a pattern: Core discipline, classes, Universal moves, Validation rules.
+Coverage ledger idea. Surface × boundary × attack class maps onto BMAD’s surface closure.
+
+Drop or simplify:
+
+The OS sandbox, parent-side descriptor promotion, and per-agent scratch and artifact trees.
+The Node validators and the JSON-Schema interpreter.
+Canonical percent-encoded coverage IDs, budgets and run profiles.
+
+Wings audits the app it just built and has no hostile target code, so full audit mode becomes optional. The default is a lens pass over FN/TB/PG IDs.
+
+Addy security-and-hardening
+
+It is the build-time spine: STRIDE per trust boundary, always/ask/never tiers, hardening patterns, and the destructive-path rule (allowlisted root, minimum depth, ownership evidence). Skip the npm install-script version matrix (npm 11.18/12.0.1 and others). It is a dated snapshot and will rot.
+
+Semgrep
+It is a rule corpus (28 categories with incorrect/correct snippets per language). The model already knows most of it, so add only gotchas.
+The rule-file format (title, impact, impactDescription, tags, incorrect/correct) matches Supabase and Vercel. That makes it the best candidate for wings’ atomic rule format.
+Keep llm-security’s “What are you building?” to priority-rules table. Cloudflare’s AI-AND-LLM is deeper (boundary-based), so use it as the base.
+Semgrep itself becomes an optional enhancer with a fallback (“if installed, run semgrep --config p/security-audit”), never a requirement. Verify the license for the rule text before copying.
+Trail of Bits (reference only, rewrite in our words)
+insecure-defaults: fail-open vs fail-secure, where the check is whether the app runs with the default.
+sharp-edges: config cliffs and 0, empty or negative values with undefined meaning.
+fp-check: a standard vs deep verification split, and rationalizations to reject.
+differential-review: risk-first triage and blast radius by caller count.
+supply-chain-risk-auditor: “unavailable data is never evidence of risk or of safety”. Its scripts were not sent.
+variant-analysis: after a finding, hunt for variants. Cloudflare covers the same ground.
+agentic-actions-auditor: niche, only for apps using AI agents in GitHub Actions. Skip.
+Mechanical additions for wings-lint
+FN: cites at least one R-, has an authorization line, and has an error list.
+TB: has a per-role access matrix, and RLS or equivalent when the stack exposes the database to clients.
+AC to check: every AC has a required_check, and the AC ID appears in a test name.
+Fail-open default scan: getenv("X", "literal") feeding a secret name.
+Findings carry FN/TB/PG IDs and are validated against the verdict contract.
+Decisions needed
+Security block shape. Build-time rules plus a review lens pass with Cloudflare’s verdict model, with no sandbox or Node machinery. Do you accept this?
+Conflict table above. Accept all, or tell me which rows to change.
+Stack packs. Drizzle/Postgres and Supabase become optional stack-conditional references, not core. Confirm.
+
+Batch 4 (frontend) is next. If you can, add the Supabase security-* and schema-* rule files from the clone, and run the LICENSE check on the repos listed above.
