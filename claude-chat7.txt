@@ -1,0 +1,127 @@
+I want you to know i am not giving you any decisions right away deliberately because i want you to have the context first and then after we have everything, then we can start designing the architecture and give wings a good shape. If you want you can save this in memory and everything that is needed for us while we design the architecture and contents of wings, ill add the chat context into the input anyways so that should help. So moving on, theres batch 4 in the knowledge. I also found there are multiple great resources for example this skill by google chrome https://github.com/GoogleChrome/modern-web-guidance and https://github.com/mattpocock/skills/tree/main/skills and https://github.com/affaan-m/ECC and https://github.com/DietrichGebert/ponytail and https://github.com/DietrichGebert/ponytail and https://github.com/Leonxlnx/taste-skill and https://github.com/alibaba/open-code-review dont fetch any of these, ive attached their trees of skills/ let me know if anything interests you.
+
+Batch 4 is large and mostly rule content. The reasoning-heavy parts are the token/design layer and the verification gates, so I analysed those first. Nothing needs deciding from you now. I’ve logged conflicts below instead of resolving them, and I’ve saved the project context.
+
+Coverage
+
+Present and read:
+
+Anthropic: frontend-design, theme-factory, web-artifacts-builder.
+Vercel: all three files.
+ui-ux-pro-max: both SKILLs, quick-reference, pro-rules, 7 design-system references, 4 scripts, CSV headers, provenance.
+first-fluke: oma-frontend, oma-design (all resources and references), oma-mobile, 5 rules.
+knowledge-work-plugins: all 7 design skills.
+Addy: 3 skills and 2 checklists.
+ccheney: modern-css (all 10 references) and feature-slicing (all 6).
+alirezarezvani: senior-frontend and a11y-audit references.
+
+Not in the send:
+
+theme-factory/themes/ and the showcase PDF.
+The a11y_scanner.py and contrast_checker.py scripts, which every a11y-audit doc depends on.
+oma-mobile/variants/*.
+CSV bodies (headers only, as requested).
+Vercel’s agent-skills (known gap).
+Architectural reasoning
+
+Frontend plugs into the spine at four points, in dependency order:
+
+Direction and tokens (DESIGN.md) must resolve first, because everything downstream references it.
+Product-wide behaviour and per-page contracts (EXPERIENCE.md, PG- files) come from the earlier bmad-ux read. Nothing in this batch supplies per-page requirements, so that gap stays open.
+Implementation rules come from oma-frontend, Addy, FSD, modern-css, and the Vercel rulebook.
+Verification gates are a11y, perf, browser, and design checklists. The most useful ones here are countable, so they should be scripts.
+
+The batch is rule-rich and process-thin. Its biggest structural problem is that “DESIGN.md” names two incompatible formats (see Conflicts).
+
+Source verdicts
+Source	Take	Drop or fix
+Vercel guidelines	Best atomic rule list (MUST/SHOULD/NEVER). The anti-pattern section is directly greppable.	README offers maximum-scale=1 while also saying never disable zoom. “Prefer APCA” conflicts with the WCAG 2.2 AA floor. Title Case and & rules are self-declared Vercel-only.
+Anthropic frontend-design	The anti-template catalog, “spend boldness in one place”, and plan-then-self-review against the brief. Its “writing in design” section beats the knowledge-work ux-copy.	None significant.
+Anthropic web-artifacts-builder, theme-factory	Nothing core.	The first is claude.ai-specific bundling. The second’s themes weren’t sent.
+ui-ux-pro-max	quick-reference as ~250 named atomic rules. The stack-CSV schema (Applies To, Status, Verified At). Closed non-executable rule grammar (reasoning_contract.py). Mode resolved once so style, palette and anti-patterns agree. Abstain rather than fabricate on a weak match. Provenance records with SLA.	BM25 engine, 22 stack datasets, the slide system (Pexels fetch, Chart.js), and runtime ${CLAUDE_PLUGIN_ROOT} paths.
+ui-ux-pro-max design-system	Primitive → semantic → component layering. State priority order.	Tailwind v3 config, token naming mixed with shadcn naming, 40px default controls (below the 44px mobile rule).
+oma-design	redesign-protocol (nobody else covers existing apps). “Seed, not final” and prompt-injection framing. 7 hierarchy principles, plus the “≥3 signals per key element” audit. Countable mechanical checks (checklist.md §6). Stub/TODO transparency markers.	getdesign-fetcher (runtime bunx fetch). stitch-integration. CJK/Pretendard as a default. Em-dash zero tolerance (a house style, not engineering).
+oma-frontend	Server/client boundary. One owner per mutation. Client-state order (server, then URL, then Jotai/Zustand). React 19 hook traps. Self-describing filenames.	Serena/Aside/shadcn-MCP plumbing. prefetch={false} everywhere (a project CPU choice). The proxy.ts false-positive entries.
+oma .agents/rules	Tokens generated from one source and generated files read-only.	Korean font default. Mise/Dart generation. The response-language rules.
+oma-mobile	State-switch pattern (loading, error, empty, data).	Out of scope unless mobile enters v1. Variants weren’t sent.
+Addy	frontend-ui-engineering and its “AI aesthetic” table. performance-optimization and checklist (consistent with the index/cache rules already settled). The browser-testing untrusted-content and profile-isolation rules.	Dialog example comments “trap focus” but uses <dialog open>, which doesn’t trap. Checklist is WCAG 2.1, not 2.2.
+ccheney modern-css	Decision flows. Cascade/@layer mechanics. The @supports-tests-a-custom-property trap. Child-only scroll-state rule.	Support tables are dated snapshots, and much of it is Chromium-only. Defaults must be Baseline-only, with the rest opt-in per target.
+ccheney feature-slicing	Pages-first extraction rule. Import matrix. Use only on trigger.	IMPLEMENTATION example persists tokens in localStorage (zustand persist + axios interceptor). Next example sets a cookie with no SameSite or __Host-, and gates on cookie presence only.
+alirezarezvani senior-frontend	The 7 forcing questions as frontend inputs to the stack record (device/network, LCP target, rendering model, bundle budget, SEO vs auth-walled, design-system home, WCAG target + owner).	Citations look misattributed (RSC “spec” credited to Abramov 2023, Svelte 5 attributed to a Harris talk). composition_map points at absent skills. The scaffolder uses stale NextAuth. Zod example uses composition rules (violates NIST 63B-4). useAsync has no cancellation, so stale responses can overwrite new ones.
+alirezarezvani a11y-audit	Fix-pattern catalog and testing checklist.	See defects below.
+knowledge-work design	design-handoff section list. ux-copy patterns.	Shallow. research-synthesis and user-research need participants, so they don’t fit a solo builder.
+Defects found
+WCAG mislabels. a11y-audit calls 2.4.11 “Focus Appearance (AA)”. In WCAG 2.2, 2.4.11 is Focus Not Obscured (AA) and Focus Appearance is 2.4.13 (AAA). Its own quick-ref has it right, so the skill contradicts itself. accessibility-review lists 2.5.5 under AA, but it is AAA.
+Large-text threshold. oma’s accessibility and color docs say “18px bold” counts as large text. The WCAG threshold is 14pt bold (≈18.67px).
+Contrast tables. I hand-recomputed three color-contrast-guide rows and got about 2.4, 2.7 and 3.5 against the stated 3.06, 2.81 and 3.13. The Tailwind mapping also looks off (gray-600 comes out near 7.6, stated 5.74). The checker script wasn’t sent, so treat these as unverified and generate ratios by script.
+Input borders. ui-ux-pro-max’s default input border (gray-300) is about 1.5:1 on white. oma’s dark --border is white at 10%. Both fail 1.4.11 non-text contrast unless another 3:1 cue exists, and both conflate border with input.
+Disabled state. states-and-variants sets pointer-events: none and cursor: not-allowed together, so the cursor never shows.
+tailwind-integration. Defines no --card variables but maps them. Labels an RGB triplet as HSL. Mixes two naming schemes.
+Generated MASTER.md violates its own rules. design_system.py emits transition: all, hover translateY, hardcoded hex, and Inter as the fallback font. Its page-override generator is keyword guesswork.
+Provenance. The 40-odd reasoning records are sourced only from sibling CSVs (circular). Their confidence values (0.88 etc.) are unexplained. Under the file’s own 90-day policy they expired about 10 Nov. Some verifiedAt dates also post-date generatedAt.
+Duplicated hex in the oma-design DESIGN.md. The Section 9 prompts copy hex values, so tokens have two homes. That breaks the single-owner rule.
+spatial-design. Bans non-8px spacing but its own scale contains 4 and 12, and py-40 isn’t on it.
+aria-patterns. The “aria-live on a container with content gets announced on load” claim is doubtful, and the real gotcha is the inverse. I wouldn’t carry it.
+ECC-style provenance caution applies here too: Vercel’s “mutations <500ms” and oma’s perf figures are unsourced thresholds.
+Conflicts logged, not decided
+Topic	Positions
+DESIGN.md format	oma/getdesign: 9 prose sections plus agent prompts. bmad-ux/Google Labs: YAML tokens plus locked prose sections, referenced by {token}.
+Token source	ui-ux-pro-max: hex primitives, HSL for shadcn. oma: OKLCH SSOT in code. modern-css: custom props, @property, color-mix. Tailwind v3 config vs v4 @theme.
+Typography default	oma: system stack. Anthropic: deliberate non-default faces. ui-ux-pro-max: 74 pairings.
+Icon library	oma: Phosphor first, lucide discouraged. ui-ux-pro-max: Heroicons/Lucide. shadcn ships lucide.
+A11y target and contrast	WCAG 2.1 (Addy, plugins) vs 2.2 (oma, a11y-audit, ui-ux-pro-max). Vercel prefers APCA.
+Project structure	oma FSD-lite, ccheney FSD v2.1, Addy colocated, senior-frontend feature folders, Next _app/_pages rename.
+Auth on the client	Bearer token in JS (oma snippets, ccheney) vs session cookies (earlier decisions).
+Perf budgets	Addy fixed 200KB, senior-frontend per-route by profile.
+Visual taste	Vercel layered shadows vs Addy “shadow-heavy” anti-pattern.
+Mechanisms worth carrying
+Countable design checks as scripts: accent/radius/theme locks, eyebrow count, hero element cap, CTA label uniqueness, one icon family.
+Per-rule applies_to, status, verified_at, and source, which answers the stack-pack rot problem.
+Page file as a delta over the design master (ui-ux-pro-max Master+Overrides).
+“Stub must be marked; an empty onClick doesn’t count as done.”
+New repos: what I want
+
+I haven’t read any of these, so this is judged from the trees only. I’d start with the first two groups.
+
+mattpocock/skills (highest value; it’s the primary source behind earlier derived “grill” material):
+
+productivity/writing-for-agents (SKILL, SKILL-MECHANICS), which belongs in Batch 0.
+productivity/grill-me, grilling, handoff.
+engineering/grill-with-docs, to-spec, to-tickets, implement, implement-spec.
+tdd (SKILL, tests, mocking).
+codebase-design (DESIGN-IT-TWICE, DEEPENING), to compare with the pstack-attributed design-it-twice.
+domain-modeling (ADR-FORMAT, GLOSSARY-FORMAT).
+diagnosing-bugs, code-review, triage, retro, prototype (UI.md, LOGIC.md), ask-matt/PHASE-BOUNDARIES.
+misc/git-guardrails-claude-code (script and SKILL), for the autonomy boundary.
+in-progress/setup-ts-deep-modules (dependency-cruiser config), a mechanical import-rule gate.
+
+affaan-m/ECC (200+ skills, so quality is likely uneven; pick narrowly):
+
+Process and honesty gates: delivery-gate, gateguard, verification-loop, test-collaboration, ai-regression-testing, click-path-audit (judging by name), operator-approval-loop, safety-guard, recursive-decision-ledger, context-and-decisions, docs-governance and living-docs-governance, contract-first, architecture-decision-records.
+Spine comparison: orch-build-mvp, orch-add-feature, orch-change-feature, orch-fix-defect, orch-pipeline.
+Frontend: frontend-a11y, accessibility, frontend-design-direction, design-system, react-performance, react-testing, motion-foundations, make-interfaces-feel-better, browser-qa, e2e-testing.
+Security: security-review, security-scan, agent-security-hardening, mcp-dependency-review.
+Packaging and eval: skill-host-compat, skill-comply, skill-stocktake, eval-harness, rules-distill.
+Skip all vertical domains (healthcare, logistics, finance, homelab, network, video, scientific, DeFi, non-web languages).
+
+Leonxlnx/taste-skill:
+
+SKILL.md, and in references/: gate, system, copy plus copy-tells, copy-registers, copy-voice, copy-moves, sections, layout-v4, perf, motion, icons.
+In scripts/: gate.mjs, consistency.mjs, copy-lint.mjs, perf.mjs, which are exactly the script-shaped checks I keep asking for.
+library/palettes.json and type.json, as samples only.
+Skip assets/ (WebGL, scenes, photos, SVG demos). It is heavy, and the photos may carry separate licences.
+
+GoogleChrome/modern-web-guidance: skills/modern-web-guidance/SKILL.md only, for now. ui-ux-pro-max’s provenance cites a modern-web-guidance-src repo with a guides/ folder (e.g. forms/ime-safe-enter-submit), so I need to know whether this SKILL carries the guidance or fetches it at runtime. A Chrome-authored source fits your verified-resources preference. Skip the extensions skill.
+
+alibaba/open-code-review: both SKILL.md files. I need to see whether they depend on an external CLI before judging fit for the reviewer gate.
+
+DietrichGebert/ponytail: ponytail, ponytail-audit, ponytail-debt, ponytail-review. I can’t judge these from the names. Skip gain and help unless they turn out to matter.
+
+I haven’t checked licences on any of these; send the LICENSE files with them.
+
+Still useful for Batch 4
+The a11y_scanner.py and contrast_checker.py scripts.
+A handful of CSV rows each from styles, colors, typography, ux-guidelines, ui-reasoning.
+theme-factory/themes/.
+
+Batch 5 (packaging) is still unsent, and ECC/skill-host-compat may feed it.
