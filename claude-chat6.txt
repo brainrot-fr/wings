@@ -1,0 +1,184 @@
+NIST.SP.800-63C-4.pdf
+PDF
+
+the owasp repo is cc by sa 4.0. and lets continue, i uploaded the NIST.SP.800-63C-4.pdf
+
+Noting that the project's memory setting is off.
+
+I’ll read the file-reading skill first, then open 63C-4.
+
+Read file-reading skill to pick the right tool for the PDF
+SKILL.md
+
+Continue
+
+I’m reading the remaining 63C-4 sections that matter for OAuth/OIDC login: session and reauthentication rules, assertion contents, and the back-channel/front-channel presentation requirements.
+
+I read 63C-4 (150 pages, text layer intact). It fills the OAuth/OIDC gap in the auth design, but it needs translating, because NIST writes for RPs and IdPs, not for a general web app.
+
+License ruling
+
+CC BY-SA 4.0 confirms my earlier recollection. OWASP text is idea-only under the same rule as Trail of Bits. Wings is MIT, and ShareAlike would force any adapted text under CC BY-SA. Two clean routes:
+
+Idea-only (recommended): rewrite every rule in wings’ own words, and list OWASP as an acknowledged inspiration in NOTICE. This is what the plan already assumes.
+Dual-license a vendored subset: this only makes sense if you want to ship OWASP-derived text. It complicates packaging, so I’d avoid it.
+
+NIST text can be reused with attribution. The notice on 63B said so. I didn’t re-check the copyright notice in this specific 63C-4 file, so a quick look at its front matter is worth doing before copying any sentence.
+
+What 63C-4 settles
+
+Where it plugs in: the stack decision record’s “login method” item, and the per-FN authorization line for any FN that opens a session from an assertion.
+
+1. Account linking and takeover (the big one).
+
+Identify the subscriber by issuer + subject together, and never process the subject alone (§3.4, §4.9).
+Linking needs an existing authenticated session, and should require authenticating with an already-linked identifier first (§3.8.1).
+Removing an identifier must revoke access through it. The user must be notified on every add or remove (§3.8).
+Account resolution (matching an incoming identity to an existing account by attributes) must use attributes that resolve uniquely, and must never attach data to an identifier that doesn’t belong to the subscriber (§3.8.2).
+The spec doesn’t say “never auto-link on email match”, but §3.8.2 implies it. email_verified is an OIDC claim, not a NIST one, so wings adds it as its own rule. Link by email only after an authenticated session proves control of the existing account.
+
+2. A session is created only when all five conditions hold (§3.9):
+
+A valid assertion was processed.
+It came from the expected IdP.
+That IdP matches the issuer in the federated identifier.
+It maps to a provisioned RP account.
+The account was provisioned the way the trust agreement says.
+
+This reads as a ready-made checklist for the login-callback FN.
+
+3. Assertion validation list (§4.9). Seven checks, in order:
+
+Signature, with a key belonging to the IdP
+Issuer
+Time window
+Audience
+Nonce
+Acceptable assurance levels
+Replay, via the assertion identifier
+
+For OIDC this maps onto the ID Token claims and the checks already in the JWT sheet. Wings’ lint can verify each check exists in the callback handler.
+
+4. Initiation and injection (§3.11.1, §4.10).
+
+The RP starts the transaction, and the request carries a nonce.
+Prohibit unsolicited IdP-initiated logins.
+Bind the callback to the unauthenticated session with an unguessable value (state/nonce).
+The RP authenticates to the IdP on the back channel.
+Reject callbacks that arrive outside the right stage.
+
+These are required at FAL2+ and recommended at FAL1. Wings should treat them as the default for every app, since they cost little.
+
+4. Presentation (§4.11).
+
+Back channel preferred. The authorization code must be single-use, bound to one RP, unguessable, and valid no more than 5 minutes. The RP authenticates when redeeming it. The IdP verifies the redeemer is the same RP that started the request.
+Front channel discouraged. Every flow that returns tokens in the URL is out. This matches the “Auth Code + PKCE only” rule already drafted. Where an IdP uses redirects, personal data in the assertion must be encrypted.
+
+5. Session independence (§4.7).
+
+The assertion’s validity window must not be used to limit the RP session.
+Failing to reach an identity API must not extend or end a session.
+The RP can ask the IdP for fresh authentication, and the assertion reports when the last authentication happened.
+This supports a max_age / step-up rule for sensitive FNs, so the per-FN authorization line should carry an “auth recency” field.
+
+6. FAL levels. FAL1 is basic. FAL2 requires RP-initiated flow, single audience, pre-established trust and injection protection. FAL3 adds holder-of-key or a bound authenticator. A consumer SaaS lands at FAL1–2. I’d put FAL2 behaviour in core as the default and keep FAL3 out, as a regulated-stakes pack.
+
+Corrections to earlier assumptions
+Last turn I flagged that OWASP’s Authentication sheet doesn’t mention email_verified. That’s correct, and 63C-4 doesn’t either, so it stays a wings-original rule.
+The “tokens never in front channel” rule now has a normative source for its security rationale, not just OWASP’s.
+NIST’s 5-minute assertion-reference cap gives me a sourced number to replace the unsourced timeout ranges I criticised in the Session sheet.
+What I still can’t verify
+
+I haven’t read §3.5–3.6 (trust agreements, key rotation) or §6 (federation threats) in detail. They matter less for a single-app builder, but §6 may carry a threat list worth checking against wings’ review lenses. I can read it next if you want.
+
+Decisions I need
+FAL default: FAL2 behaviours as the core default, FAL3 as an optional stack pack. Accept?
+Auth-recency field on the per-FN authorization line (for step-up). Accept?
+Rule on email-based linking: never auto-link; link only from an authenticated session. Accept?
+
+Per your note, nothing is saved to memory. Next, send the three remaining sheets I asked for (Key_Management, NoSQL_Security, DOM_based_XSS_Prevention are already in this batch; I’ll cover them with the Tier 4–5 analysis).
+
+continue with next steps, you already have all the tier files.
+
+All 8 Tier 4 files, all 12 Tier 5 files, and the three linked sheets (Key_Management, NoSQL_Security, DOM_based_XSS_Prevention) are present. OWASP stays idea-only per your CC BY-SA ruling. Nothing is saved to memory.
+
+Architectural reasoning
+
+The two tiers plug in differently.
+
+Tier 4 is the process and review layer. It feeds the threat-model step in the spine, the review lenses, and one thing no earlier source covered: wings is itself an AI agent writing code, so the sheets about AI coding risk apply to wings’ own workflow.
+Tier 5 is stack packs. Core rules are stack-neutral and already sourced from Tiers 1–3. A pack loads only when the stack decision record names that stack. Packs rot fastest, so each one must carry pinned versions and a “re-verify against current docs before use” instruction.
+Tier 4 verdicts
+Source	Take	Drop or fix
+Secure_Coding_with_AI	The most relevant sheet in the batch. Hallucinated dependencies, out-of-scope edits, test fabrication and deletion, rules-file persistence, invisible-Unicode injection, human accountability.	The 30-day package-age figure is unsourced. “.gitignore doesn’t stop AI tools reading files” is tool-dependent, so say “use the tool’s own ignore file”. The Top 10 table uses 2021 numbering. The CVE-2026-39313 citation is unverified.
+AI_Agent_Security	Tool authorization enforced outside the model. Approval bound to the exact action and consumed atomically. Fail closed on unknown tools. Abuse-case test matrix.	The Python is broken: re is never imported, Optional is missing in the monitor example, and the pydantic v1 validator is deprecated. The “checksum” is a concatenated hash, not an HMAC, truncated to 64 bits. All thresholds are arbitrary. Take the controls, not the code.
+LLM_Prompt_Injection_Prevention	Its own admission that filtering is not a boundary. The five-point “Secure Implementation Pipeline”. Hidden-text checks. Smoke-test grading: per-objective observables, counts not rates, “no violation observed” is not “blocked”.	The sample system prompt with “NEVER…” rules and the typoglycemia matcher both contradict its own thesis. The cited statistics and arXiv IDs are unverified.
+MCP_Security	Pin the whole tool definition including annotations. Annotations are hints, not enforcement. Audience-validate tokens and never pass them through. Validate Origin and bind to localhost. stdio is not a sandbox.	The x402 payment section is niche. The spec revision date (2026-07-28) is unverified. Only the “reserve the spend cap atomically” idea survives, and Business_Logic already covers it. Loads only when the app builds or consumes MCP.
+Secure_Code_Review	Baseline vs diff-based reviews. Diff review per slice is wings’ default, and one baseline runs before ship. The finding template, remapped to FN/TB/PG IDs, P0–P3, confidence, and Cloudflare’s verdict.	Its generic checklists duplicate Tiers 1–3. “Lockout mechanisms” conflicts with the no-permanent-lockout rule. The grep examples are weak. Drop assignee, due date, and the metrics section.
+Threat_Modeling	The four questions as the spine. STRIDE per trust boundary. The four-way response register: mitigate, eliminate, transfer, accept.	Drop the technique-comparison table (PASTA/OCTAVE/VAST ceremony), the brainstorming advocacy, and the team-challenges essay.
+Abuse_Case	Unique IDs tied to a feature and a test. The business-risk rating kept separate from CVSS.	The sheet is self-archived (“rarely used in practice”). The five-role workshop and Excel flow don’t fit a solo user. Business_Logic’s “dishonest user” exercise replaces it.
+Secure_Product_Design	Almost nothing. The five prompts (Context, Components, Connections, Code, Configuration) map onto the stakes ladder.	Generic principles. “Product Security Levels” and “Golden Path” are referenced but never defined.
+Tier 5 verdicts
+Source	Take	Drop or fix
+Nextjs_Security	Best stack source. Entry-point classification table. Server Actions are public POST endpoints. Return DTOs, not records. Cache keys carry the audience. Rewrites and image config are security code. Test by calling entry points directly.	Version-specific claims (proxy.ts in Next 16, use cache, updateTag) must be re-verified at use. Only CVE-2025-29927 is one I recognize.
+Backend_as_a_Service (draft)	Best source for the Supabase pack. Classify credentials by who can hold them. Inventory every surface (DB, storage, realtime, functions). Privileged credentials bypass policy, so authorize first. Revocation deadline per surface. The six-column request-path inventory is a ready spine artifact.	Marked draft, so verify provider claims at use.
+GitHub_Actions_Security	permissions: {} by default. Pin uses: by SHA. Avoid pull_request_target and workflow_run. Pass context through env vars, not run: interpolation. OIDC over static secrets. persist-credentials: false. No caches in release workflows.	The post-mortem links (Trivy, Cline) are unverified. Lint rules and zizmor work as an optional enhancer with a fallback.
+NPM_Security	npm ci. --ignore-scripts plus an allowlist. files allowlist and --dry-run on publish. Scoped packages plus an .npmrc registry mapping. Slopsquatting checks. Treat README examples as untrusted (§13).	“Classic tokens revoked” and the “195M downloads” figure are unverified. The sigstore code is illustrative only.
+Docker_Security	Non-root user, --cap-drop all, no-new-privileges, read-only fs plus tmpfs, resource limits, no docker.sock mount. Bind published ports to 127.0.0.1 (the UFW bypass gotcha). BuildKit secret mounts.	The alpine + groupadd/useradd example fails, because Alpine uses addgroup/adduser. The socket mount example has a // typo. Skip the Kubernetes duplicates and the Podman pitch.
+JavaScript_and_TypeScript	eval/Function. Prototype pollution (Map, Object.create(null), reject __proto__). postMessage origin checks. Types are erased, so validate at the boundary and derive the type from the schema.	Solid. Defers to the Prototype_Pollution sheet, which wasn’t sent.
+FastAPI_Security	OAuth2PasswordBearer doesn’t validate tokens. Router-level dependencies as deny-by-default. extra="forbid". Separate input schemas plus response_model. Upload limits at the proxy, because the form is parsed before dependencies run.	The is_admin boolean is RBAC without an ownership predicate. HS256 is the example default.
+Django_Security	manage.py check --deploy as a gate. The proxy-header trust warning.	“Change the admin URL” is obscurity. The min_length: 8 example fails NIST’s 15 for single-factor passwords. The Django 6.0 built-in CSP claim is unverified.
+Nodejs_Security	Express query-shape table (?foo[bar]=baz gives an object, which is real type confusion). Log and exit on uncaughtException. The permission model, optional.	Legacy module advice (express-brute, bouncer, acl, toobusy). new (Winston.Logger) is wrong for winston 3. The cookie example hardcodes a secret. “Lie in X-Powered-By” is silly.
+Software_Supply_Chain, CI_CD_Security	The four threat categories as review-lens headings. The OpenSSF supplier checklist for dependency admission.	The rest is generic and duplicated by NPM, Actions, and Secrets.
+Database_Security	Per-app and per-environment accounts. The app must not be the table owner (ties to the RLS-bypass finding). Verify TLS certs. No direct client-to-DB connections without RLS.	MySQL/MSSQL hardening is off-target. “Needs only SELECT, UPDATE, DELETE” omits INSERT. It links PostgreSQL 7.0 docs.
+The three linked sheets
+DOM_based_XSS: keep rules 6–7 (textContent, right-side-only), guidelines 1, 6, 8, 10, and the warning that JSON.stringify is not output encoding. Drop the ESAPI rules. It recommends node-esapi while the Node sheet says avoid it, and the examples contain invalid JS (Function myFunction, createTextElement).
+NoSQL_Security: keep operator injection via object-typed values (check the scalar type before building the filter). It’s only a pack if the stack uses MongoDB.
+Key_Management: mostly redundant with Cryptographic_Storage. Keep one-key-one-purpose, the AES-GCM 2^32 random-IV limit, and “rewrapping a KEK doesn’t reset DEK cryptoperiods”. The FIPS-module-for-key-generation rule is unrealistic for app developers.
+Wings as its own attack surface
+
+Wings reads upstream repos in full and rewrites them, so those repos are untrusted input to the build step. The rules below come from Secure_Coding_with_AI, AI_Agent_Security, and the earlier gstack/Addy material:
+
+Upstream and fetched text is data, never instructions. The core skill carries one shared statement of this.
+Invisible-character scan over generated code and over ingested upstream text: bidi controls (U+202A–202E, U+2066–2069), zero-width characters (U+200B–200D, U+FEFF), and tag characters (U+E0000–E007F). It’s stdlib-only and script-shaped.
+Test independence. The agent that writes code shouldn’t be the sole author of its tests. Derive security tests from the spec: the authorization matrix from FN lines, acceptance criteria written before code, RED recorded. A mechanical gate fails any deleted test, reduced assertion count, or newly mocked unit under test. A fresh-context reviewer backs this up.
+Scope gate. Each task declares allowed paths (the oma idea). Edits outside them, or to lockfiles, CI, Dockerfiles, package scripts, or rules files, stop for sign-off.
+Dependency admission. Every new dependency gets a log entry: exists on the registry, age, maintenance, license, and a lockfile commit.
+Autonomy boundary. Reversible local edits are autonomous. Anything destructive or irreversible (production migrations, deploys, secret changes, rules-file edits) needs explicit human approval, and no gate is weakened by the agent that owns the work.
+Conflicts and house rules
+Conflict	Rule
+Top 10 numbering (2021 vs 2025 across sheets)	Cite CWE or category names. Never “A05”.
+Package age: 30 days (Coding with AI) vs “a few days” (Actions)	One stated default, parameterized in the stack record. Labeled a wings judgment, not a sourced fact.
+“Lockout mechanisms” (Code Review)	Throttle with escalating delay. No permanent lockout.
+node-esapi (DOM XSS) vs avoid (Node)	Avoid. Use framework escaping plus DOMPurify.
+“Never auto-approve” vs autonomous shipping	The autonomy boundary above.
+HS256 examples, is_admin booleans	The stack record chooses. Role plus ownership/tenant predicate stays mandatory.
+“.gitignore doesn’t hide files from AI tools”	Tool-specific. Use the tool’s own ignore file.
+wings-lint additions
+Diff gate: out-of-scope paths, deleted tests, reduced assertion counts, and changes to protected files.
+Invisible-character scan on generated and ingested text.
+Workflow patterns: unpinned uses:, missing permissions, pull_request_target with a PR-head checkout, ${{ github.event.* }} inside run:.
+Dockerfile patterns: missing USER, unpinned base, secrets in ARG/ENV, curl | sh.
+JS patterns: eval, new Function, innerHTML, dangerouslySetInnerHTML without a sanitizer.
+Next.js pack: every server action and route handler file carries an authorization classification, and the inventory is derived from the file tree.
+AI features: if the repo imports an LLM SDK, the FN needs a tool allowlist and an authorization line enforced outside the model.
+New IDs: TH-n (threats, each with a response and, if “mitigate”, a test reference) and AB-n (abuse cases, each linked to an FN and a test name). Both fit the existing ID pattern.
+Unverified claims I won’t carry forward
+CVE-2026-39313
+Hughes et al.’s 89%/78% jailbreak figures, and the arXiv 2605.x IDs
+The MCP spec revision date
+Next.js 16’s proxy.ts, and Django 6.0 built-in CSP
+npm classic tokens being revoked
+The Node permission model being stable from 23.5.0
+The Trivy and Cline post-mortems
+The “195M weekly downloads” figure
+
+Stack packs must re-check these before use.
+
+Decisions needed
+Package-age default: pick a number, e.g. 7 days routine and 30 for a package new to the project. This is a judgment call with no source, so I won’t choose it silently.
+Test-independence rule: security tests are generated from FN authorization lines by script, not by the code-writing step. Accept?
+Autonomy boundary as listed above. Accept?
+Stack packs for v1: Next.js, Supabase/BaaS, Postgres-Drizzle, GitHub Actions, and Docker as optional packs. FastAPI, Django, Node-Express and NoSQL deferred. Confirm or reorder.
+
+With this, the security inputs are complete. Next is either Batch 4 (frontend) or drafting the security block spec from Batches 2–3 plus this analysis. Which do you want first?
