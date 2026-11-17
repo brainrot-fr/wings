@@ -1,0 +1,99 @@
+from now on, no memory usage is allowed to you. all the CC by SA 4.0 can be copied/modified until they are open source and are being credited so we will use CC by SA-4.0 licensed projects as regular repos for copying/adapting/changing them. Continue
+
+Stopping memory use here: I can't switch memory off myself. The "Generate memory from chats" setting in Settings controls that, and I'll stay off the memory tools and stored details for the rest of this chat. One note on the BY-SA decision was saved moments before your message, and I'll remove it if you say so.
+
+**Licensing**
+- Nothing in this send is BY-SA. Every LICENSE shown is MIT or Apache-2.0.
+- For BY-SA sources later: ShareAlike applies to adaptations, so keep adapted text in separate files with credit and a change notice. Don't blend it into MIT files.
+- The GoogleChrome LICENSE is the unfilled Apache template (`Copyright [yyyy] [name of copyright owner]`). Confirm the holder and any NOTICE in that repo before attributing.
+
+## Where this batch lands
+
+Dependency order:
+1. **Process spine:** grilling → domain-modeling → to-spec → to-tickets → implement / implement-spec → tdd → code-review → retro.
+2. **Mechanical gates:** taste-skill's gate protocol, perf.mjs, copy-lint, the deep-modules depcruise config, and the open-code-review delegate (coverage accounting).
+3. **Rule content:** ux CSVs and a11y.
+4. **Packaging:** the `agents/openai.yaml` files and `disable-model-invocation`, which belong to Batch 5.
+
+Almost everything in the spine calls the others by name through the Skill tool. Every spec, ticket and review skill also assumes `/setup-matt-pocock-skills`, which wasn't sent. Wings needs its own tracker and label config to replace it.
+
+## Verdicts
+
+**mattpocock (MIT): highest value.**
+- Take: the grilling "frontier" rounds, the glossary/ADR formats (three-condition ADR test), vertical-slice tickets with blocking edges, the AGENT-BRIEF durability rules, code-review's smell baseline, prototype as a throwaway "primary source", and writing-for-agents (Batch 0).
+- **tdd vs implement-spec:** tdd requires user-confirmed seams before any test, but implement-spec runs it in unattended subagents. Only to-spec's seam step makes that work, so the seams must be carried in the ticket.
+- **tdd red-green-refactor:** tdd's description says "red-green-refactor" but its rules exclude refactoring from the loop.
+- **git-guardrails vs implement-spec:** the guardrail blocks all `git push`, but implement-spec opens a draft PR, which needs one. The regex is also substring-based (`git -C . push` and `sh -c` slip through), and it needs `jq`.
+- **setup-ts-deep-modules:** the doc says four rules and the config has five (`tests-folder-is-private` is undocumented). It's still a good mechanical import gate, TS-only.
+- **PHASE-BOUNDARIES:** the decision tree is good, but it's written in Claude Code slash commands and cites an unsourced "~150k smart zone".
+- Not sent, though ask-matt routes to them: improve-codebase-architecture, wayfinder, research, to-questionnaire, wizard, wait-what, teach, pr, setup.
+
+**taste-skill (MIT): take the mechanisms, not the design opinions.**
+- It targets marketing sites (one section per screen, 100svh, hero entrances, "never violet"), not app UI. The design rules don't transfer.
+- **gate.mjs** is the best protocol seen so far: round counting, waivers (one finding each, at most 5, reason of 12+ characters), non-waivable hard FAILs, a block ledger so it never traps an agent, and a one-line `GATE:` verdict. It answers the countable-checks-as-scripts gap.
+- **perf.mjs:** median of 3 runs, and timing verdicts capped at WARN when host CPU is busy. Its CLS thresholds (0.1/0.25) match published Core Web Vitals, but its LCP and FCP rows are CPU-relative and unsourced. Verify before adopting.
+- **copy-lint:** per-hit findings and device budgets are reusable. The slop-word lists are tuned to marketing copy.
+- **consistency.mjs:** the CDP harness plus the generic modules (basics/keyboard walk, tap-size, collide, reduced-motion, hidden-content) are reusable. The SR-1..8 and hero rules are not.
+- **Gate dependencies:** gate.mjs hashes the kit under `assets/` and shells out to `assets/layout/check.mjs`. Neither was sent, so as shipped it can only end in ERROR. Parameterize the check list when porting.
+- **checker-gaming FAIL:** it flags any `navigator.webdriver` test as a hard failure. That's a false positive for apps with bot protection.
+- **Orphaned Chrome:** consistency.mjs and perf.mjs kill only the Chrome parent PID on Linux and macOS, so helper processes can linger. gate.mjs handles this via process groups.
+- **icons.md:** it dropped the theSVG icon set because its licence was only the package's, not a grant from each mark's owner. That's the provenance discipline wings wants.
+
+**modern-web-guidance (Apache-2.0): this answers my earlier question.**
+- The SKILL carries no guidance. It fetches at runtime via `npx -y modern-web-guidance@latest search|retrieve`. `--skill-version` is pinned, but the package itself is `@latest`, so that's unpinned code execution plus network on every task.
+- To vendor the guides I'd need the package or source repo, not this SKILL.
+- Its default policy is "Baseline Widely available is safe without fallbacks; otherwise follow the guide", overridable in AGENTS.md or CLAUDE.md. That is a concrete answer to the Chromium-only support tables in modern-css.
+- It forces a `### Modern Web Guidance` section in outputs, which is a format cost.
+
+**open-code-review (Apache-2.0).**
+- The main skill needs the `ocr` CLI (npm global), a configured LLM endpoint, and its own LLM calls.
+- The delegate skill is LLM-free. `preview` and `rule` handle deterministic file selection and rule resolution, and coverage accounting (`reviewed_files`, `skipped_files`, `coverage_rate`) is mandatory.
+- It also has useful prompt-injection hygiene for shell-quoting untrusted background text.
+- Two cautions: "discard likely false positives silently" conflicts with an honest-report gate, and the npm install should be version-pinned.
+
+**ponytail (MIT).**
+- Take the `shortcut: <limit>, <upgrade>` comment convention with the `ponytail-debt` grep ledger (grepable and scriptable), and the audit/review rubric: "no concrete case, no finding" and "grep before calling code unused".
+- The core skill is an always-on session mode. I'd use it as a lens in review and audit rather than as a mode.
+- It conflicts with codebase-design ("never add layers" vs ports and adapters) and with tdd (one small check vs agreed seams).
+- Skip the "very simple English" output rule.
+
+**Data and scripts (batch-4 samples).**
+- **colors.csv:** I recomputed 5 values by hand:
+  - #2563EB on white ≈ 5.2:1.
+  - #6366F1 with black text ≈ 4.7:1.
+  - #EA580C with black text ≈ 5.9:1.
+  - #A16207 on white ≈ 4.9:1.
+  - Border #E2E8F0 on #F8FAFC ≈ 1.18:1, which fails 1.4.11 as an input border. This confirms the earlier finding.
+  - The "Accent adjusted from …" notes are a good mechanism worth keeping.
+- **styles.csv:** `requires:contrast-text-4.5,keyboard,…` and `cost:…|drivers:…` are machine-checkable tokens, and the Status, Parent and Replacement columns handle lifecycle.
+- **ui-reasoning.csv:** the sample rows have empty Reasoning and Confidence cells, so the provenance problem is confirmed. `constraint:add-urgency-colors` is a dark-pattern rule I'd drop.
+- **ux-guidelines.csv:** row 1 recommends unconditional `scroll-behavior: smooth`. That needs a reduced-motion guard, and taste-skill bans it outright.
+- **typography.csv:** its pairings use runtime Google Fonts `@import`.
+- **contrast_checker.py:** the math is correct, and it's a fine core. Weak points:
+  - `suggest` returns the lowest passing ratios, i.e. borderline colors.
+  - It parses no `rgba`, `hsl`, `oklch` or 8-digit hex.
+- **a11y_scanner.py:** don't use it as a gate.
+  - It scans per line, so multi-line JSX tags are missed.
+  - It flags missing `<main>` and `<h1>` on every component file as "serious", and exits 1 on that.
+  - It flags correct `alt=""` on decorative images as "serious".
+  - It treats an `id` alone as a label, and demands explicit `aria-live` on `role=alert|status`.
+  - Keep the rule catalogue, not the scanner.
+- **theme-factory (10 themes):** slide palettes with no role mapping. Low value for app work. Sunset Boulevard's "Deep Purple" `#264653` is actually dark teal. Ocean Depths' teal accent on navy is about 3.9:1, so it works for large text only.
+
+## Conflicts logged, not decided
+- Smooth scroll: ux CSV vs taste-skill vs reduced-motion.
+- Review vocabularies: ponytail's findings vs open-code-review's severity/category enums vs mattpocock's two axes.
+- Push policy: git-guardrails vs implement-spec's PR step.
+- tdd seam confirmation vs unattended subagents.
+- ponytail "no layers" vs codebase-design.
+- Inter as a default (typography.csv) vs taste-skill's ban.
+- Text contrast target: taste-skill requires 7:1 for body text, above the WCAG AA floor.
+- Google Fonts remote loading vs privacy and perf.
+
+## Still missing
+- ECC (your next pass).
+- taste-skill's `assets/`, `photos.mjs`, `icons.mjs`, `start.mjs`, `deal.mjs`, `moments.mjs`, `shoot.mjs`, and the remaining references.
+- The mattpocock skills listed above.
+- oma-mobile variants.
+- Vercel agent-skills.
+- The theme-factory showcase PDF.
