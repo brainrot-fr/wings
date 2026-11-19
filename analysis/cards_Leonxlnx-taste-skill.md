@@ -1,0 +1,14 @@
+### new candidates/Leonxlnx-taste-skill/skills/taste-skill
+- Purpose: Guide visual design and gate completion of a local web page against design, copy, and performance checks.
+- Wings block fit: frontend
+- Maturity: real mechanism
+- Core mechanism worth taking:
+  - `scripts/gate.mjs:47-53,555-580` — findings can be waived only by specific check/target/reason, with caps and validation.
+  - `scripts/gate.mjs:365,374` — detects modified kit assets and checker-specific behavior.
+  - `references/perf.md:14-30` — reports measurable page budgets with PASS/WARN/FAIL vocabulary.
+- Gotchas/defects found: `gate.mjs:310-321,511` requires the out-of-scope `assets/` kit and `assets/layout/check.mjs`; asset-dependent checks need explicit skip handling to run without them.
+- Hard dependencies: Node 22+ for perf (`references/perf.md:3`), Chrome/Chromium, local page server, and asset kit; some helpers call `ffmpeg`.
+- Portability: partial — the gate and waiver concepts transfer, but checker/assets/tooling are not standalone.
+- Overlap: web-design-guidelines; writing-guidelines; react-best-practices.
+- Verdict: TAKE-IDEAS — preserve narrow waivers and explicit gate outcomes; replace asset/browser dependencies.
+- Confidence in this card: low

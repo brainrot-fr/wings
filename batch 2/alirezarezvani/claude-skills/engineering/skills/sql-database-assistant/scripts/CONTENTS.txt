@@ -1,3 +1,0 @@
-migration_generator.py
-query_optimizer.py
-schema_explorer.py

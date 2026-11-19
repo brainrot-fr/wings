@@ -1,0 +1,161 @@
+path,line,flag,snippet
+new candidates/GoogleChrome-modern-web-guidance/skills/modern-web-guidance/SKILL.md,23,RUNTIME_FETCH,"npx -y modern-web-guidance@latest search ""<query>"" --skill-version 2026_11_09-5bcc021b"
+new candidates/GoogleChrome-modern-web-guidance/skills/modern-web-guidance/SKILL.md,23,UNPINNED_EXEC,"npx -y modern-web-guidance@latest search ""<query>"" --skill-version 2026_11_09-5bcc021b"
+new candidates/GoogleChrome-modern-web-guidance/skills/modern-web-guidance/SKILL.md,36,RUNTIME_FETCH,"npx -y modern-web-guidance@latest retrieve ""<id>"""
+new candidates/GoogleChrome-modern-web-guidance/skills/modern-web-guidance/SKILL.md,36,UNPINNED_EXEC,"npx -y modern-web-guidance@latest retrieve ""<id>"""
+new candidates/GoogleChrome-modern-web-guidance/skills/modern-web-guidance/SKILL.md,63,RUNTIME_FETCH,npx -y modern-web-guidance@latest legacy-scan <path> --json
+new candidates/GoogleChrome-modern-web-guidance/skills/modern-web-guidance/SKILL.md,63,UNPINNED_EXEC,npx -y modern-web-guidance@latest legacy-scan <path> --json
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/copy-tells.md,20,TELEMETRY,"- **Ban words** [copy-slop-word]: delve, tapestry, testament to, realm, embark, beacon, multifaceted,"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/diagrams.md,26,TELEMETRY,"| `fanin`, `bowtie` | many into one; and out to many | fanin-warehouse, fanin-telemetry (tech), bowtie-events, bowtie-mo"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/consistency.mjs,280,SHELL_EXEC,"import { spawn, spawnSync } from 'node:child_process';"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/consistency.mjs,558,NETWORK_CALL,"    const r = await fetch(u, { signal: AbortSignal.timeout(Math.min(10000, left)) });"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/consistency.mjs,558,RUNTIME_FETCH,"    const r = await fetch(u, { signal: AbortSignal.timeout(Math.min(10000, left)) });"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/consistency.mjs,4620,SHELL_EXEC,"  const proc = spawn(exe, ["
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/consistency.mjs,4632,SHELL_EXEC,"      if (process.platform === 'win32') spawnSync('taskkill', ['/pid', String(pid), '/T', '/F'], { stdio: 'ignore' });"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/consistency.mjs,4643,SHELL_EXEC,"      if (process.platform === 'win32') spawnSync('taskkill', ['/pid', String(pid), '/T', '/F'], { stdio: 'ignore' });"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/consistency.mjs,4664,NETWORK_CALL,    c.ws = new WebSocket(wsUrl);
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/consistency.mjs,4664,RUNTIME_FETCH,    c.ws = new WebSocket(wsUrl);
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/consistency.mjs,9209,NETWORK_CALL,"    const r = await fetch(u, { method: 'GET', redirect: 'follow' });"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/consistency.mjs,9209,RUNTIME_FETCH,"    const r = await fetch(u, { method: 'GET', redirect: 'follow' });"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/consistency.mjs,9467,TELEMETRY,const SOFT_W = /\b(app|apps|software|saas|platform|api|sdk|tool|tools|plugin|extension|dashboard|analytics|ai|assistant|
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/consistency.mjs,9741,NETWORK_CALL,"      else { const r = await fetch(u); if (r.ok) text = (await r.text()).slice(0, 3e6); }"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/consistency.mjs,9741,RUNTIME_FETCH,"      else { const r = await fetch(u); if (r.ok) text = (await r.text()).slice(0, 3e6); }"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/copy-lint.mjs,15,TELEMETRY,"  --kind (tech, software, gaming, product, place, service) lets a game keep its own nouns (realm, beacon); without it"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/copy-lint.mjs,192,TELEMETRY,"const SLOP = ['delve', 'delves', 'tapestry', 'testament to', 'realm', 'embark', 'beacon', 'multifaceted', 'paradigm', 'm"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/copy-lint.mjs,211,TELEMETRY,"  realm: () => KIND === 'gaming', embark: () => KIND === 'gaming', beacon: () => /^(gaming|tech|software)$/.test(KIND),"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/copy-lint.mjs,290,TELEMETRY,"  // a listed word inside the client's name (Elevate Pilates, Beacon Dental) is the name, not copy: the name as the"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/effects.mjs,39,SHELL_EXEC,"import { spawn, execFileSync } from 'node:child_process';"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/effects.mjs,440,SHELL_EXEC,"  const child = spawn(findChrome(), args, { stdio: 'ignore', windowsHide: true });"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/effects.mjs,450,SHELL_EXEC,"      try { execFileSync('taskkill', ['/PID', String(child.pid), '/T', '/F'], { stdio: 'ignore' }); } catch (_) { try { "
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/effects.mjs,454,NETWORK_CALL,  const ver = await (await fetch(`http://127.0.0.1:${port}/json/version`)).json();
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/effects.mjs,454,RUNTIME_FETCH,  const ver = await (await fetch(`http://127.0.0.1:${port}/json/version`)).json();
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/effects.mjs,455,NETWORK_CALL,  const ws = new WebSocket(ver.webSocketDebuggerUrl);
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/effects.mjs,455,RUNTIME_FETCH,  const ws = new WebSocket(ver.webSocketDebuggerUrl);
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/gate.mjs,93,SHELL_EXEC,"import { spawn, spawnSync } from 'node:child_process';"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/gate.mjs,399,SHELL_EXEC,"  const r = spawnSync(process.execPath, [path.join(here, 'copy-lint.mjs'), file, '--json', ...(kind ? ['--kind', kind] :"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/gate.mjs,426,SHELL_EXEC,"  if (process.platform === 'win32') spawnSync('taskkill', ['/pid', String(c.pid), '/T', '/F'], { stdio: 'ignore', window"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/gate.mjs,431,SHELL_EXEC,"const WATCHDOG = `let ok=false;const fin=()=>{if(ok)process.exit(0);const[pid,...dirs]=process.argv.slice(1);const cp=re"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/gate.mjs,439,SHELL_EXEC,"    const c = spawn(process.execPath, [script, ...argv], { cwd, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true, de"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/gate.mjs,442,SHELL_EXEC,"    try { wd = spawn(process.execPath, ['-e', WATCHDOG, String(c.pid), ...dirs], { stdio: ['pipe', 'ignore', 'ignore'], "
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/icons.mjs,94,NETWORK_CALL,  const r = await fetch(url);
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/icons.mjs,94,RUNTIME_FETCH,  const r = await fetch(url);
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/icons.mjs,494,SHELL_EXEC,"  const { spawn, execFileSync } = await import('node:child_process');"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/icons.mjs,522,SHELL_EXEC,"  const child = spawn(chromePath, ['--headless=new', `--user-data-dir=${profile}`, '--remote-debugging-port=0', '--no-fi"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/icons.mjs,523,SHELL_EXEC,"  const killChrome = () => { try { if (process.platform === 'win32') execFileSync('taskkill', ['/PID', String(child.pid)"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/icons.mjs,529,NETWORK_CALL,    for (let i = 0; i < 50 && !target; i++) { try { target = (await (await fetch(`http://127.0.0.1:${port}/json/list`)).
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/icons.mjs,529,RUNTIME_FETCH,    for (let i = 0; i < 50 && !target; i++) { try { target = (await (await fetch(`http://127.0.0.1:${port}/json/list`)).
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/icons.mjs,531,NETWORK_CALL,    const ws = new WebSocket(target.webSocketDebuggerUrl);
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/icons.mjs,531,RUNTIME_FETCH,    const ws = new WebSocket(target.webSocketDebuggerUrl);
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/moments.mjs,58,SHELL_EXEC,"import { spawn, execFileSync } from 'node:child_process';"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/moments.mjs,352,SHELL_EXEC,"  const child = spawn(findChrome(), ['--headless=new', `--user-data-dir=${profile}`, '--remote-debugging-port=0', '--no-"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/moments.mjs,355,SHELL_EXEC,"  const kill = () => { if (child.exitCode != null) return; try { execFileSync('taskkill', ['/PID', String(child.pid), '/"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/moments.mjs,362,NETWORK_CALL,    const ver = await (await fetch(`http://127.0.0.1:${dport}/json/version`)).json();
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/moments.mjs,362,RUNTIME_FETCH,    const ver = await (await fetch(`http://127.0.0.1:${dport}/json/version`)).json();
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/moments.mjs,363,NETWORK_CALL,    const ws = new WebSocket(ver.webSocketDebuggerUrl);
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/moments.mjs,363,RUNTIME_FETCH,    const ws = new WebSocket(ver.webSocketDebuggerUrl);
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/perf.mjs,34,SHELL_EXEC,"import { spawn, execFileSync } from 'node:child_process';"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/perf.mjs,156,NETWORK_CALL,    const html = await (await fetch(location.href)).text();
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/perf.mjs,156,RUNTIME_FETCH,    const html = await (await fetch(location.href)).text();
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/perf.mjs,389,SHELL_EXEC,"const child = spawn(findChrome(), ['--headless=new', `--user-data-dir=${profile}`, '--remote-debugging-port=0', '--no-fi"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/perf.mjs,392,SHELL_EXEC,"const kill = () => { if (child.exitCode != null) return; try { execFileSync('taskkill', ['/PID', String(child.pid), '/T'"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/perf.mjs,400,NETWORK_CALL,  const ver = await (await fetch(`http://127.0.0.1:${port}/json/version`)).json();
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/perf.mjs,400,RUNTIME_FETCH,  const ver = await (await fetch(`http://127.0.0.1:${port}/json/version`)).json();
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/perf.mjs,401,NETWORK_CALL,  const ws = new WebSocket(ver.webSocketDebuggerUrl);
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/perf.mjs,401,RUNTIME_FETCH,  const ws = new WebSocket(ver.webSocketDebuggerUrl);
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/photos.mjs,79,SHELL_EXEC,import { spawnSync } from 'node:child_process';
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/photos.mjs,676,NETWORK_CALL,"        const r = await fetch(u, { headers: { 'User-Agent': UA, Accept: 'application/json' }, signal: AbortSignal.timeou"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/photos.mjs,676,RUNTIME_FETCH,"        const r = await fetch(u, { headers: { 'User-Agent': UA, Accept: 'application/json' }, signal: AbortSignal.timeou"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/photos.mjs,795,NETWORK_CALL,"    try { r = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'image/*' }, signal: AbortSignal.timeout(60000) })"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/photos.mjs,795,RUNTIME_FETCH,"    try { r = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'image/*' }, signal: AbortSignal.timeout(60000) })"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/photos.mjs,808,SHELL_EXEC,"const FFMPEG = (() => { try { return spawnSync('ffmpeg', ['-version'], { stdio: 'ignore' }).status === 0; } catch { retu"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/photos.mjs,817,SHELL_EXEC,"  const r = spawnSync('ffmpeg', ['-loglevel', 'error', '-i', 'pipe:0', '-c:v', 'libwebp', '-quality', '78', '-compressio"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/photos.mjs,826,SHELL_EXEC,"  const r = spawnSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', from, '-vf', vf, '-c:v', 'libwebp', '-quality', '74',"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/shoot.mjs,56,SHELL_EXEC,"import { spawn, execFileSync } from 'node:child_process';"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/shoot.mjs,321,SHELL_EXEC,"const child = spawn(findChrome(), ['--headless=new', `--user-data-dir=${profile}`, '--remote-debugging-port=0', '--no-fi"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/shoot.mjs,324,SHELL_EXEC,"const kill = () => { if (child.exitCode != null) return; try { execFileSync('taskkill', ['/PID', String(child.pid), '/T'"
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/shoot.mjs,332,NETWORK_CALL,  const ver = await (await fetch(`http://127.0.0.1:${port}/json/version`)).json();
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/shoot.mjs,332,RUNTIME_FETCH,  const ver = await (await fetch(`http://127.0.0.1:${port}/json/version`)).json();
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/shoot.mjs,333,NETWORK_CALL,  const ws = new WebSocket(ver.webSocketDebuggerUrl);
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/shoot.mjs,333,RUNTIME_FETCH,  const ws = new WebSocket(ver.webSocketDebuggerUrl);
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/start.mjs,214,INVISIBLE_CHAR,"    const read = f => { try { return JSON.parse(fs.readFileSync(f, 'utf8').replace(/^﻿/, '')); } catch { return null; } "
+new candidates/alibaba-open-code-review/skills/open-code-review/SKILL.md,246,RUNTIME_FETCH,ocr config set llm.url https://api.anthropic.com/v1/messages
+new candidates/first-fluke-fullstack-starter/.agents/skills/_shared/core/execution-policy.md,18,DEAD_REF,- Use the shared [result contract](../runtime/result-contract.md) for agent handoffs. Process exit zero and a Markdown f
+new candidates/vercel-labs-agent-skills/skills/composition-patterns/SKILL.md,1,LICENSE_MISSING,No LICENSE in ancestry under vercel-labs-agent-skills
+new candidates/vercel-labs-agent-skills/skills/deploy-to-vercel/SKILL.md,1,LICENSE_MISSING,No LICENSE in ancestry under vercel-labs-agent-skills
+new candidates/vercel-labs-agent-skills/skills/deploy-to-vercel/SKILL.md,167,RUNTIME_FETCH,npx vercel@latest deploy [path] --temporary -y
+new candidates/vercel-labs-agent-skills/skills/deploy-to-vercel/SKILL.md,167,UNPINNED_EXEC,npx vercel@latest deploy [path] --temporary -y
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,116,DEAD_REF,This is a specialization of [Defer Await Until Needed](./async-defer-await.md) for `flag && cheapCondition` style checks
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,219,DEAD_REF,"For `await getFlag()` combined with a cheap synchronous guard (`flag && someCondition`), see [Check Cheap Conditions Bef"
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,510,TELEMETRY,"Analytics, logging, and error tracking don't block user interaction. Load them after hydration."
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,515,TELEMETRY,import { Analytics } from '@vercel/analytics/react'
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,522,TELEMETRY,        <Analytics />
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,534,TELEMETRY,const Analytics = dynamic(
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,535,TELEMETRY,"  () => import('@vercel/analytics/react').then(m => m.Analytics),"
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,544,TELEMETRY,        <Analytics />
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,892,DEAD_REF,"For static assets and config, see [Hoist Static I/O to Module Level](./server-hoist-static-io.md)."
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,1294,TELEMETRY,"Use Next.js's `after()` to schedule work that should execute after a response is sent. This prevents logging, analytics,"
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,1346,TELEMETRY,- Analytics tracking
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,1482,TELEMETRY,"**Use passive when:** tracking/analytics, logging, any listener that doesn't call `preventDefault()`."
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,1991,TELEMETRY,  analytics.trackPageView(pathname)
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,2000,TELEMETRY,  analytics.trackPageView(pathname)
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,2477,RUNTIME_FETCH,npx svgo --precision=1 --multipass icon.svg
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,2616,TELEMETRY,Use `defer` for scripts that depend on DOM or other scripts. Use `async` for independent scripts like analytics.
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,2625,TELEMETRY,"        <script src=""https://example.com/analytics.js"" />"
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,2642,TELEMETRY,"      <Script src=""https://example.com/analytics.js"" strategy=""afterInteractive"" />"
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,2713,TELEMETRY,  prefetchDNS('https://analytics.example.com')
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,3192,TELEMETRY,"  analytics.track('search', { query })"
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,3207,TELEMETRY,"    analytics.track('search', { query })"
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,3223,TELEMETRY,// Ensure analytics fires within 2 seconds even if browser stays busy
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,3225,TELEMETRY,"  () => analytics.track('page_view', { path: location.pathname }),"
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,3265,TELEMETRY,- Analytics and telemetry
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/SKILL.md,1,LICENSE_MISSING,No LICENSE in ancestry under vercel-labs-agent-skills
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/SKILL.md,52,TELEMETRY,- `bundle-defer-third-party` - Load analytics/logging after hydration
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/bundle-defer-third-party.md,5,TELEMETRY,"tags: bundle, third-party, analytics, defer"
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/bundle-defer-third-party.md,10,TELEMETRY,"Analytics, logging, and error tracking don't block user interaction. Load them after hydration."
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/bundle-defer-third-party.md,15,TELEMETRY,import { Analytics } from '@vercel/analytics/react'
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/bundle-defer-third-party.md,22,TELEMETRY,        <Analytics />
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/bundle-defer-third-party.md,34,TELEMETRY,const Analytics = dynamic(
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/bundle-defer-third-party.md,35,TELEMETRY,"  () => import('@vercel/analytics/react').then(m => m.Analytics),"
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/bundle-defer-third-party.md,44,TELEMETRY,        <Analytics />
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/client-passive-event-listeners.md,46,TELEMETRY,"**Use passive when:** tracking/analytics, logging, any listener that doesn't call `preventDefault()`."
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/js-request-idle-callback.md,5,TELEMETRY,"tags: javascript, performance, idle, scheduling, analytics"
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/js-request-idle-callback.md,22,TELEMETRY,"  analytics.track('search', { query })"
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/js-request-idle-callback.md,37,TELEMETRY,"    analytics.track('search', { query })"
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/js-request-idle-callback.md,53,TELEMETRY,// Ensure analytics fires within 2 seconds even if browser stays busy
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/js-request-idle-callback.md,55,TELEMETRY,"  () => analytics.track('page_view', { path: location.pathname }),"
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/js-request-idle-callback.md,95,TELEMETRY,- Analytics and telemetry
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rendering-resource-hints.md,27,TELEMETRY,  prefetchDNS('https://analytics.example.com')
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rendering-script-defer-async.md,17,TELEMETRY,Use `defer` for scripts that depend on DOM or other scripts. Use `async` for independent scripts like analytics.
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rendering-script-defer-async.md,26,TELEMETRY,"        <script src=""https://example.com/analytics.js"" />"
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rendering-script-defer-async.md,43,TELEMETRY,"        <script src=""https://example.com/analytics.js"" async />"
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rendering-script-defer-async.md,61,TELEMETRY,"      <Script src=""https://example.com/analytics.js"" strategy=""afterInteractive"" />"
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rendering-svg-precision.md,27,RUNTIME_FETCH,npx svgo --precision=1 --multipass icon.svg
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rerender-split-combined-hooks.md,47,TELEMETRY,  analytics.trackPageView(pathname)
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rerender-split-combined-hooks.md,56,TELEMETRY,  analytics.trackPageView(pathname)
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/server-after-nonblocking.md,5,TELEMETRY,"tags: server, async, logging, analytics, side-effects"
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/server-after-nonblocking.md,10,TELEMETRY,"Use Next.js's `after()` to schedule work that should execute after a response is sent. This prevents logging, analytics,"
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/server-after-nonblocking.md,62,TELEMETRY,- Analytics tracking
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/SKILL.md,1,LICENSE_MISSING,No LICENSE in ancestry under vercel-labs-agent-skills
+new candidates/vercel-labs-agent-skills/skills/react-view-transitions/AGENTS.md,366,DEAD_REF,"Choose the animation pattern from the audit and this skill's guidance, then copy only the applicable sections from [css-"
+new candidates/vercel-labs-agent-skills/skills/react-view-transitions/AGENTS.md,463,DEAD_REF,"- If the same element appears in **both** the fallback and the content (a title, a heading), it flickers on reveal — an "
+new candidates/vercel-labs-agent-skills/skills/react-view-transitions/AGENTS.md,483,DEAD_REF,"When list items contain shared elements, compose both patterns with two nested `<ViewTransition>` layers — an outer keye"
+new candidates/vercel-labs-agent-skills/skills/react-view-transitions/AGENTS.md,500,DEAD_REF,"If any path produces no animation or competing animations, use the symptom-driven [troubleshooting guide](troubleshootin"
+new candidates/vercel-labs-agent-skills/skills/react-view-transitions/AGENTS.md,502,DEAD_REF,"For Next.js-specific implementation steps (`transitionTypes` on `<Link>`, prefetch behavior, and same-route dynamic segm"
+new candidates/vercel-labs-agent-skills/skills/react-view-transitions/AGENTS.md,1164,DEAD_REF,"When following [implementation.md](implementation.md), apply these additions:"
+new candidates/vercel-labs-agent-skills/skills/react-view-transitions/README.md,35,RUNTIME_FETCH,npx skills add https://github.com/vercel-labs/agent-skills --skill vercel-react-view-transitions
+new candidates/vercel-labs-agent-skills/skills/react-view-transitions/SKILL.md,1,LICENSE_MISSING,No LICENSE in ancestry under vercel-labs-agent-skills
+new candidates/vercel-labs-agent-skills/skills/vercel-cli-with-tokens/SKILL.md,1,LICENSE_MISSING,No LICENSE in ancestry under vercel-labs-agent-skills
+new candidates/vercel-labs-agent-skills/skills/vercel-cli-with-tokens/SKILL.md,84,RUNTIME_FETCH,"# e.g. ""my-team"" from ""https://vercel.com/my-team/my-project"""
+new candidates/vercel-labs-agent-skills/skills/vercel-cli-with-tokens/SKILL.md,85,RUNTIME_FETCH,"echo ""$PROJECT_URL"" | sed 's|https://vercel.com/||' | cut -d/ -f1"
+new candidates/vercel-labs-agent-skills/skills/vercel-cli-with-tokens/SKILL.md,295,TELEMETRY,"- Paid add-ons available: SAML SSO, HIPAA BAA, Flags Explorer, Observability Plus, Speed Insights, Web Analytics Plus."
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/AGENTS.md,32,RUNTIME_FETCH,npx skills add vercel-labs/agent-skills --skill vercel-optimize
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/README.md,14,RUNTIME_FETCH,npx skills add vercel-labs/agent-skills --skill vercel-optimize
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/SKILL.md,1,LICENSE_MISSING,No LICENSE in ancestry under vercel-labs-agent-skills
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/lib/cost-coverage.mjs,47,TELEMETRY,"  { match: /^Web Analytics/i,                            dim: null, family: 'fixed', actionable: false },"
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/lib/grade-recommendation.mjs,6,NETWORK_CALL,const COUNT_WORDS_RE = /\b(errors?|queries|invocations|requests|reads|writes|bytes|fetch(?:es)?|calls?|hits?|misses?|sec
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/lib/grade-recommendation.mjs,6,RUNTIME_FETCH,const COUNT_WORDS_RE = /\b(errors?|queries|invocations|requests|reads|writes|bytes|fetch(?:es)?|calls?|hits?|misses?|sec
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/lib/investigation-brief.mjs,587,TELEMETRY,"  lines.push('6. **Vercel voice.** Sharp teammate, clear, competent, no fluff. Lead with observed metrics and the user a"
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/lib/scanners/region-pin-in-config.mjs,22,TELEMETRY,"    ""Audit the pinned region against traffic geography (Speed Insights or Web Analytics by country) and data-source loca"
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/lib/vercel.mjs,3,SHELL_EXEC,import { execFile } from 'node:child_process';
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/lib/vercel.mjs,83,UNPINNED_EXEC,    const err = new Error('VERCEL_NOT_INSTALLED: `vercel` CLI not found in PATH. Install with `npm i -g vercel@latest`.'
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/lib/vercel.mjs,87,SHELL_EXEC,"  return await exec(command.file, [...command.prefix, ...args], { windowsHide: true, ...opts });"

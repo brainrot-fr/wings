@@ -1,0 +1,24 @@
+path,line,flag,snippet
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/lib/vercel.mjs,99,UNPINNED_EXEC,    throw new Error('VERCEL_NOT_INSTALLED: `vercel` CLI not found in PATH. Install with `npm i -g vercel@latest`.');
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/lib/vercel.mjs,108,UNPINNED_EXEC,"        `VERCEL_CLI_TOO_OLD: have ${v.join('.')}, need >= ${MIN_CLI_VERSION.join('.')}. Upgrade with \`npm i -g vercel@l"
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/lib/verify-claim.mjs,4,SHELL_EXEC,import { execFile } from 'node:child_process';
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/references/docs-library.json,631,TELEMETRY,"      ""topic"": ""Defer analytics/logging scripts post-hydration"","
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/references/playbooks/ai-application.md,14,TELEMETRY,"4. **`after()` / `waitUntil()` for tool logging.** Tool-call telemetry, audit writes, and analytics should never block t"
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/references/playbooks/api-service.md,14,TELEMETRY,"4. **Background work post-response.** `after()` (Next 15+) for analytics, webhooks-to-self, and any write that doesn't a"
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/references/playbooks/content-site.md,30,TELEMETRY,- `vercel-react-best-practices:bundle-defer-third-party` — defer analytics/cookie banners
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/references/playbooks/ecommerce.md,28,TELEMETRY,"- `vercel-react-best-practices:bundle-defer-third-party` — defer analytics (GA, Mixpanel) post-hydration"
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/references/playbooks/marketing.md,15,TELEMETRY,"5. **Defer all third-party JS post-hydration.** Analytics, chat widgets, marketing pixels, cookie banners. None of them "
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/references/playbooks/marketing.md,21,TELEMETRY,- **Tracking pixel waterfalls.** Three different analytics services loaded in a chain. Load them after hydration in para
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/references/playbooks/marketing.md,29,TELEMETRY,- `vercel-react-best-practices:bundle-defer-third-party` — defer analytics/pixels
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/references/playbooks/saas.md,14,TELEMETRY,"4. **Async work after response.** Activity logs, audit trails, analytics events — anything that doesn't block the user —"
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/references/playbooks/saas.md,29,TELEMETRY,- `vercel-react-best-practices:server-after-nonblocking` — defer audit/analytics writes (Next 15+)
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/references/scanner-patterns.md,164,TELEMETRY,**Fix.** Audit the pinned region against traffic geography (Speed Insights or Web Analytics by country) and data-source 
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/references/support-topics/function-duration-io-and-after.md,16,TELEMETRY,"Compare `cpu.p95`, `ttfb.p95`, and `latency.p95`. In source, separate dependent awaits from independent awaits, and iden"
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/references/support-topics/function-region-misconfiguration-ttfb.md,17,TELEMETRY,"Scanner subtype (`vercel-json-single`, `segment-preferred`) and pinned regions. Cross-check Speed Insights TTFB and coun"
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/references/support-topics/next-script-third-party-strategy.md,17,TELEMETRY,"Inspect `next/script`, raw `<script>`, tag managers, chat widgets, analytics, and consent code. Check `beforeInteractive"
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/references/support-topics/post-response-work-waituntil.md,16,TELEMETRY,"Inspect the listed route for analytics, logging, notifications, cache warming, metrics, or webhook side effects that hap"
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/references/voice.md,56,TELEMETRY,| `Web Analytics` | `Vercel Analytics` |
+new candidates/vercel-labs-agent-skills/skills/web-design-guidelines/SKILL.md,1,LICENSE_MISSING,No LICENSE in ancestry under vercel-labs-agent-skills
+new candidates/vercel-labs-agent-skills/skills/web-design-guidelines/SKILL.md,26,RUNTIME_FETCH,https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md
+new candidates/vercel-labs-agent-skills/skills/writing-guidelines/SKILL.md,1,LICENSE_MISSING,No LICENSE in ancestry under vercel-labs-agent-skills
+new candidates/vercel-labs-agent-skills/skills/writing-guidelines/SKILL.md,26,RUNTIME_FETCH,https://raw.githubusercontent.com/vercel-labs/writing-guidelines/main/command.md

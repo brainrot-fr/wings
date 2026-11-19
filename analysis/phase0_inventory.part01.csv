@@ -1,0 +1,222 @@
+path,bytes,lines,est_tokens(bytes/4),has_frontmatter(y/n),fm_name,fm_name_matches_dir(y/n),description_chars,description_has_use_when(y/n),top_level_fm_keys,license_file_nearby(path or none)
+new candidates/alibaba-open-code-review/skills/open-code-review-delegate/SKILL.md,9746,212,2436.5,y,open-code-review-delegate,y,315,y,"name,description,license,compatibility,metadata",new candidates/alibaba-open-code-review/LICENSE
+new candidates/alibaba-open-code-review/skills/open-code-review/SKILL.md,13012,258,3253.0,y,open-code-review,y,496,y,"name,description,license,compatibility,metadata",new candidates/alibaba-open-code-review/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/_shared/core/anti-ai-prose.md,7544,195,1886.0,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/_shared/core/api-contracts/README.md,2446,28,611.5,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/_shared/core/api-contracts/template.md,2172,90,543.0,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/_shared/core/clarification-protocol.md,2310,23,577.5,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/_shared/core/code-intelligence.md,2160,46,540.0,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/_shared/core/common-checklist.md,1746,28,436.5,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/_shared/core/context-budget.md,2124,22,531.0,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/_shared/core/context-loading.md,2734,34,683.5,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/_shared/core/difficulty-guide.md,2069,26,517.2,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/_shared/core/execution-policy.md,2475,21,618.8,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/_shared/core/lessons-learned.md,2933,33,733.2,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/_shared/core/prompt-structure.md,1345,18,336.2,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/_shared/core/quality-principles.md,1232,11,308.0,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/_shared/core/session-metrics.md,3698,35,924.5,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/_shared/core/skill-routing.md,3118,39,779.5,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/_shared/core/stack-verify.schema.json,1440,44,360.0,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/_shared/core/test-approach.md,2633,54,658.2,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/_shared/core/vendor-detection.md,4034,51,1008.5,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/oma-mobile/variants/flutter/api-template.dart,18459,461,4614.8,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/oma-mobile/variants/flutter/snippets.md,43212,1353,10803.0,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/oma-mobile/variants/flutter/stack.yaml,456,21,114.0,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/oma-mobile/variants/flutter/tech-stack.md,11674,201,2918.5,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/oma-mobile/variants/react-native/api-template.ts,23150,531,5787.5,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/oma-mobile/variants/react-native/snippets.md,38302,1014,9575.5,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/oma-mobile/variants/react-native/stack.yaml,574,22,143.5,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/oma-mobile/variants/react-native/tech-stack.md,11687,192,2921.8,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/oma-mobile/variants/README.md,2093,43,523.2,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/oma-mobile/variants/stack.schema.json,2580,68,645.0,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/oma-mobile/variants/swift-ios/api-template.swift,6983,165,1745.8,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/oma-mobile/variants/swift-ios/snippets.md,36109,1028,9027.2,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/oma-mobile/variants/swift-ios/stack.yaml,682,25,170.5,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/first-fluke-fullstack-starter/.agents/skills/oma-mobile/variants/swift-ios/tech-stack.md,11149,174,2787.2,n,,,0,n,,new candidates/first-fluke-fullstack-starter/LICENSE
+new candidates/GoogleChrome-modern-web-guidance/skills/modern-web-guidance/SKILL.md,9793,90,2448.2,y,modern-web-guidance,y,855,n,"name,description",new candidates/GoogleChrome-modern-web-guidance/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/library/palettes.json,43118,1966,10779.5,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/library/type.json,22998,1603,5749.5,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/backgrounds.md,7998,111,1999.5,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/cards.md,24292,309,6073.0,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/copy-moves.md,8056,138,2014.0,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/copy-registers.md,9236,154,2309.0,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/copy-tells.md,9612,126,2403.0,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/copy-voice.md,11902,179,2975.5,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/copy.md,14747,193,3686.8,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/diagrams.md,6860,95,1715.0,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/effects-creative.md,18582,245,4645.5,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/effects-objects.md,23169,298,5792.2,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/effects-usage.md,13591,182,3397.8,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/gate.md,13183,204,3295.8,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/icons.md,6758,86,1689.5,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/layout-v4.md,23591,297,5897.8,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/moments.md,18173,214,4543.2,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/motion.md,19242,234,4810.5,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/perf.md,5707,46,1426.8,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/photos.md,27704,263,6926.0,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/scenes.md,8705,127,2176.2,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/sections-library.md,66041,1120,16510.2,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/sections.md,53916,634,13479.0,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/references/system.md,16078,230,4019.5,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/consistency.mjs,1015117,11485,253779.2,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/copy-lint.mjs,41437,463,10359.2,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/effects.mjs,33361,561,8340.2,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/gate.mjs,68364,891,17091.0,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/icons.mjs,46035,609,11508.8,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/moments.mjs,42632,569,10658.0,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/perf.mjs,34716,435,8679.0,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/photos.mjs,96474,1025,24118.5,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/shoot.mjs,40467,483,10116.8,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/scripts/start.mjs,32384,470,8096.0,n,,,0,n,,new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/Leonxlnx-taste-skill/skills/taste-skill/SKILL.md,30970,381,7742.5,y,design-taste-frontend,n,904,n,"name,description,hooks",new candidates/Leonxlnx-taste-skill/LICENSE
+new candidates/vercel-labs-agent-skills/skills/composition-patterns/AGENTS.md,22627,946,5656.8,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/composition-patterns/metadata.json,530,11,132.5,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/composition-patterns/README.md,2140,60,535.0,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/composition-patterns/rules/_sections.md,829,29,207.2,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/composition-patterns/rules/_template.md,329,24,82.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/composition-patterns/rules/architecture-avoid-boolean-props.md,2267,100,566.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/composition-patterns/rules/architecture-compound-components.md,2600,112,650.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/composition-patterns/rules/patterns-children-over-render-props.md,1886,87,471.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/composition-patterns/rules/patterns-explicit-variants.md,2395,100,598.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/composition-patterns/rules/react19-no-forwardref.md,953,42,238.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/composition-patterns/rules/state-context-interface.md,4974,191,1243.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/composition-patterns/rules/state-decouple-implementation.md,2699,113,674.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/composition-patterns/rules/state-lift-state.md,3224,125,806.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/composition-patterns/SKILL.md,2886,89,721.5,y,vercel-composition-patterns,n,0,n,"name,description,license,metadata",none
+new candidates/vercel-labs-agent-skills/skills/deploy-to-vercel/SKILL.md,9721,230,2430.2,y,deploy-to-vercel,y,194,y,"name,description,metadata",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/AGENTS.md,108261,3810,27065.2,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/metadata.json,921,15,230.2,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/README.md,3360,123,840.0,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/_sections.md,1554,46,388.5,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/_template.md,631,28,157.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/advanced-effect-event-deps.md,1802,56,450.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/advanced-event-handler-refs.md,1483,55,370.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/advanced-init-once.md,958,42,239.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/advanced-use-latest.md,1072,39,268.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/async-api-routes.md,1125,38,281.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/async-cheap-condition-before-await.md,1220,37,305.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/async-defer-await.md,2208,82,552.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/async-dependencies.md,1293,51,323.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/async-parallel.md,654,28,163.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/async-suspense-boundaries.md,2510,99,627.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/bundle-analyzable-paths.md,2382,63,595.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/bundle-barrel-imports.md,2795,60,698.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/bundle-conditional.md,949,31,237.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/bundle-defer-third-party.md,920,49,230.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/bundle-dynamic-imports.md,791,35,197.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/bundle-preload.md,1149,50,287.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/client-event-listeners.md,1969,74,492.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/client-localstorage-schema.md,1950,71,487.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/client-passive-event-listeners.md,1644,48,411.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/client-swr-dedup.md,1159,56,289.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/js-batch-dom-css.md,3266,107,816.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/js-cache-function-results.md,1949,80,487.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/js-cache-property-access.md,532,28,133.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/js-cache-storage.md,1651,70,412.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/js-combine-iterations.md,753,32,188.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/js-early-exit.md,1133,50,283.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/js-flatmap-filter.md,1411,60,352.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/js-hoist-regexp.md,1028,45,257.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/js-index-maps.md,837,37,209.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/js-length-check-first.md,1747,49,436.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/js-min-max-loop.md,2290,82,572.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/js-request-idle-callback.md,2647,105,661.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/js-set-map-lookups.md,532,24,133.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/js-tosorted-immutable.md,1782,57,445.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rendering-activity.md,564,26,141.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rendering-animate-svg-wrapper.md,1185,47,296.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rendering-conditional-render.md,980,40,245.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rendering-content-visibility.md,815,38,203.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rendering-hoist-jsx.md,1039,46,259.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rendering-hydration-no-flicker.md,2308,82,577.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rendering-hydration-suppress-warning.md,872,30,218.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rendering-resource-hints.md,2549,85,637.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rendering-script-defer-async.md,1868,68,467.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rendering-svg-precision.md,588,28,147.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rendering-usetransition-loading.md,2074,75,518.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rerender-defer-reads.md,973,39,243.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rerender-dependencies.md,824,45,206.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rerender-derived-state-no-effect.md,1201,40,300.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rerender-derived-state.md,728,29,182.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rerender-functional-setstate.md,2968,74,742.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rerender-lazy-state-init.md,2016,58,504.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rerender-memo-with-default-value.md,1173,38,293.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rerender-memo.md,1148,44,287.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rerender-move-effect-to-event.md,1268,45,317.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rerender-no-inline-components.md,2135,82,533.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rerender-simple-expression-in-memo.md,1018,35,254.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rerender-split-combined-hooks.md,1844,64,461.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rerender-transitions.md,1055,40,263.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rerender-use-deferred-value.md,1846,59,461.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/rerender-use-ref-transient-values.md,1742,73,435.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/server-after-nonblocking.md,2012,73,503.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/server-auth-actions.md,2649,96,662.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/server-cache-lru.md,1353,41,338.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/server-cache-react.md,2228,76,557.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/server-dedup-props.md,2060,65,515.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/server-hoist-static-io.md,4423,149,1105.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/server-no-shared-module-state.md,1766,50,441.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/server-parallel-fetching.md,1554,83,388.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/server-parallel-nested-fetching.md,992,34,248.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/rules/server-serialization.md,996,38,249.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-best-practices/SKILL.md,7251,149,1812.8,y,vercel-react-best-practices,n,329,n,"name,description,license,metadata",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/AGENTS.md,73771,2897,18442.8,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/metadata.json,896,16,224.0,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/README.md,5064,165,1266.0,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/_sections.md,2228,86,557.0,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/_template.md,631,28,157.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/animation-derived-value.md,1373,53,343.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/animation-gesture-detector-press.md,2559,95,639.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/animation-gpu-properties.md,2059,65,514.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/design-system-compound-components.md,1625,66,406.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/fonts-config-plugin.md,1393,71,348.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/imports-design-system-folder.md,1418,68,354.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/js-hoist-intl.md,1645,61,411.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/list-performance-callbacks.md,1059,44,264.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/list-performance-function-references.md,4133,132,1033.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/list-performance-images.md,1417,53,354.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/list-performance-inline-objects.md,2308,97,577.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/list-performance-item-expensive.md,2466,94,616.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/list-performance-item-memo.md,2250,82,562.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/list-performance-item-types.md,2749,104,687.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/list-performance-virtualize.md,1742,67,435.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/monorepo-native-deps-in-app.md,1091,46,272.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/monorepo-single-dependency-versions.md,1351,63,337.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/navigation-native-navigators.md,4941,188,1235.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/react-compiler-destructure-functions.md,1274,50,318.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/react-compiler-reanimated-shared-values.md,1268,48,317.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/react-state-dispatcher.md,2255,91,563.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/react-state-fallback.md,1735,56,433.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/react-state-minimize.md,1740,65,435.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/rendering-no-falsy-and.md,1812,74,453.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/rendering-text-in-text-component.md,697,36,174.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/scroll-position-no-state.md,1936,82,484.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/state-ground-truth.md,2172,80,543.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/ui-expo-image.md,1648,66,412.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/ui-image-gallery.md,2546,104,636.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/ui-measure-views.md,2232,78,558.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/ui-menus.md,4598,174,1149.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/ui-native-modals.md,1859,77,464.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/ui-pressable.md,1534,61,383.5,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/ui-safe-area-scroll.md,1579,65,394.8,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/ui-scrollview-content-inset.md,1317,45,329.2,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/rules/ui-styling.md,2212,87,553.0,y,,,0,n,"title,impact,impactDescription,tags",none
+new candidates/vercel-labs-agent-skills/skills/react-native-skills/SKILL.md,4439,121,1109.8,y,vercel-react-native-skills,n,0,n,"name,description,license,metadata",none
+new candidates/vercel-labs-agent-skills/skills/react-view-transitions/AGENTS.md,59088,1380,14772.0,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/react-view-transitions/metadata.json,852,12,213.0,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/react-view-transitions/README.md,2231,44,557.8,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/react-view-transitions/references/css-recipes.md,8337,312,2084.2,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/react-view-transitions/references/implementation.md,9280,170,2320.0,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/react-view-transitions/references/nextjs.md,10700,233,2675.0,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/react-view-transitions/references/patterns.md,11941,274,2985.2,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/react-view-transitions/references/troubleshooting.md,4940,47,1235.0,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/react-view-transitions/SKILL.md,14502,332,3625.5,y,vercel-react-view-transitions,n,664,y,"name,description,license,metadata",none
+new candidates/vercel-labs-agent-skills/skills/vercel-cli-with-tokens/SKILL.md,10476,353,2619.0,y,vercel-cli-with-tokens,y,236,y,"name,description,metadata",none
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/AGENTS.md,1964,48,491.0,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/CONTRIBUTING.md,2224,41,556.0,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/lib/auth-route.mjs,807,23,201.8,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/lib/budget-summary.mjs,7145,182,1786.2,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/lib/citations.mjs,4029,139,1007.2,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/lib/cost-coverage.mjs,8628,143,2157.0,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/lib/dedup-recs.mjs,10151,325,2537.8,n,,,0,n,,none
+new candidates/vercel-labs-agent-skills/skills/vercel-optimize/lib/deep-dive.mjs,10458,350,2614.5,n,,,0,n,,none

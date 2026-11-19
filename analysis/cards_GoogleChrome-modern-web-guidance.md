@@ -1,0 +1,14 @@
+### new candidates/GoogleChrome-modern-web-guidance/skills/modern-web-guidance
+- Purpose: Search and retrieve current web-platform guidance for implementation or modernization tasks.
+- Wings block fit: frontend
+- Maturity: vendor-specific
+- Core mechanism worth taking:
+  - `skills/modern-web-guidance/SKILL.md:16-23` — constrain searches to one user-visible platform capability.
+  - `skills/modern-web-guidance/SKILL.md:29-40` — retrieve only matched guides and rephrase once when results are weak.
+  - `skills/modern-web-guidance/SKILL.md:63-70` — reserves legacy scanning for broad modernization.
+- Gotchas/defects found: `:23,36,63` runs `npx -y modern-web-guidance@latest`; package is unpinned and downloaded at use time.
+- Hard dependencies: Node/npm/npx, network, unpinned package; legacy scan is an optional additional command.
+- Portability: partial — the query discipline transfers, but guidance is served by an external package.
+- Overlap: web-design-guidelines; react-best-practices; react-native-skills.
+- Verdict: SKIP — runtime fetch and unpinned execution conflict with wings decisions.
+- Confidence in this card: high
