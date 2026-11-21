@@ -1,0 +1,17 @@
+{
+  "name": "app1-ledgerline",
+  "version": "1.0.0",
+  "description": "Ledgerline multi-tenant invoice fixture",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "migrate": "node scripts/migrate.js",
+    "seed": "node scripts/seed.js",
+    "test": "node --test --test-concurrency=1"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "dependencies": {
+    "better-sqlite3": "^13.2.0"
+  }
+}
